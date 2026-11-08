@@ -81,7 +81,11 @@ export class WebhooksController {
   ) {
     // Fastify gives us raw body access via req.rawBody if configured,
     // otherwise use the parsed body re-serialised (safe for HMAC since Paystack sends JSON)
-    const rawPayload = (req as any).rawBody ?? JSON.stringify(body);
+    const rawPayload = (req as any).rawBody
+      ? (Buffer.isBuffer((req as any).rawBody)
+          ? (req as any).rawBody.toString('utf8')
+          : String((req as any).rawBody))
+      : JSON.stringify(body);
     const verified = this.service.verifyPaystackWebhook(rawPayload, signature);
     if (!verified) {
       throw new BadRequestException('Invalid Paystack webhook signature');
