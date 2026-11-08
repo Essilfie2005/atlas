@@ -305,7 +305,13 @@ export class PaymentIntentsService {
     };
   }
 
-  private serialize(intent: { amount: bigint;[k: string]: unknown }): Record<string, unknown> {
-    return { ...intent, amount: intent.amount.toString() };
+  private serialize(intent: any): Record<string, unknown> {
+    const meta = (intent.metadata ?? {}) as Record<string, any>;
+    const customerEmail = intent.customer?.email || meta.customerEmail || null;
+    return {
+      ...intent,
+      amount: Number(intent.amount),
+      customerEmail,
+    };
   }
 }

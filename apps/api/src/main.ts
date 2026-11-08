@@ -39,6 +39,18 @@ async function bootstrap() {
     { bufferLogs: true },
   );
 
+  // Preserve raw body buffer for HMAC webhook signature verification (Paystack)
+  const fastify = app.getHttpAdapter().getInstance();
+  fastify.addContentTypeParser('application/json', { parseAs: 'buffer' }, (req: any, body: Buffer, done: any) => {
+    req.rawBody = body.toString('utf8');
+    try {
+      const json = JSON.parse(req.rawBody);
+      done(null, json);
+    } catch (err) {
+      done(err, undefined);
+    }
+  });
+
   const configService = app.get(ConfigService);
   const port = configService.get<number>('port') ?? 3000;
   const nodeEnv = configService.get<string>('nodeEnv') ?? 'development';

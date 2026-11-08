@@ -27,7 +27,7 @@ export default function DashboardPage() {
         setRecentTransactions(recentItems);
         setTotalTransactions(totalCount);
         
-        const totalVol = recentItems.reduce((acc: number, tx: any) => acc + (tx.amount || 0), 0);
+        const totalVol = recentItems.reduce((acc: number, tx: any) => acc + (Number(tx.amount) || 0), 0);
         setVolume(totalVol);
       } catch (error) {
         console.error('Error loading dashboard data', error);
@@ -52,6 +52,8 @@ export default function DashboardPage() {
     );
   }
 
+  const currencySymbol = recentTransactions[0]?.currency === 'GHS' || !recentTransactions[0]?.currency ? 'GH₵' : recentTransactions[0]?.currency;
+
   return (
     <div className="p-6 space-y-6 max-w-7xl mx-auto">
       <h1 className="text-2xl font-bold">Welcome back{merchant?.name ? `, ${merchant.name}` : ''}</h1>
@@ -60,9 +62,9 @@ export default function DashboardPage() {
         <div className="bg-white p-6 rounded-lg border shadow-sm">
           <div className="flex items-center justify-between pb-2">
             <h3 className="text-sm font-medium text-gray-500">Total Volume (Recent)</h3>
-            <DollarSign className="w-4 h-4 text-gray-500" />
+            <span className="text-xs font-semibold text-slate-400">{currencySymbol}</span>
           </div>
-          <div className="text-2xl font-bold">${(volume / 100).toFixed(2)}</div>
+          <div className="text-2xl font-bold">{currencySymbol} {(Number(volume) / 100).toFixed(2)}</div>
         </div>
         <div className="bg-white p-6 rounded-lg border shadow-sm">
           <div className="flex items-center justify-between pb-2">
@@ -96,14 +98,23 @@ export default function DashboardPage() {
                 <tbody>
                   {recentTransactions.map((tx: any) => (
                     <tr key={tx.id} className="border-b last:border-0">
-                      <td className="px-6 py-4">${(tx.amount / 100).toFixed(2)}</td>
+                      <td className="px-6 py-4 font-semibold text-slate-900">
+                        {tx.currency === 'GHS' || !tx.currency ? 'GH₵' : tx.currency} {(Number(tx.amount) / 100).toFixed(2)}
+                      </td>
                       <td className="px-6 py-4">
-                        <span className="px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                        <span className={`px-2.5 py-1 rounded-full text-xs font-semibold border ${
+                          tx.status === 'SUCCEEDED' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' :
+                          tx.status === 'PENDING' ? 'bg-amber-50 text-amber-700 border-amber-200' :
+                          tx.status === 'FAILED' ? 'bg-red-50 text-red-700 border-red-200' :
+                          'bg-blue-50 text-blue-700 border-blue-200'
+                        }`}>
                           {tx.status}
                         </span>
                       </td>
-                      <td className="px-6 py-4">{tx.customerEmail || 'N/A'}</td>
-                      <td className="px-6 py-4">{new Date(tx.createdAt).toLocaleDateString()}</td>
+                      <td className="px-6 py-4 text-slate-600 font-medium">
+                        {tx.customerEmail || tx.metadata?.customerEmail || '—'}
+                      </td>
+                      <td className="px-6 py-4 text-slate-500">{new Date(tx.createdAt).toLocaleDateString()}</td>
                     </tr>
                   ))}
                 </tbody>
