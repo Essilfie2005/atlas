@@ -85,23 +85,38 @@ export class ApiKeyGuard implements CanActivate {
     }
 
     // ── 2. Fall back to API key (machine-to-machine) ─────────────────────────
-    const keyHash = createHash('sha256').update(rawToken).digest('hex');
-
     let apiKey: {
       id: string; name: string; type: string; scopes: string[];
       status: string; expiresAt: Date | null; merchantId: string;
       merchant: { id: string; legalName: string; email: string; country: string | null; status: string };
-    } | null;
+    } | null = null;
 
     try {
-      apiKey = await this.prisma.apiKey.findUnique({
-        where: { keyHash },
-        select: {
-          id: true, name: true, type: true, scopes: true,
-          status: true, expiresAt: true, merchantId: true,
-          merchant: { select: { id: true, legalName: true, email: true, country: true, status: true } },
-        },
-      });
+      if (rawToken.startsWith('pk_')) {
+        const activeKeys = await this.prisma.apiKey.findMany({
+          where: { status: 'ACTIVE' },
+          select: {
+            id: true, name: true, type: true, scopes: true,
+            status: true, expiresAt: true, merchantId: true,
+            merchant: { select: { id: true, legalName: true, email: true, country: true, status: true } },
+          },
+        });
+        apiKey = activeKeys.find((k) => {
+          const pubPrefix = k.type === 'LIVE' ? 'pk_live' : 'pk_test';
+          const pub = `${pubPrefix}_${createHash('sha256').update(k.id + k.merchantId).digest('hex').substring(0, 24)}`;
+          return pub === rawToken;
+        }) ?? null;
+      } else {
+        const keyHash = createHash('sha256').update(rawToken).digest('hex');
+        apiKey = await this.prisma.apiKey.findUnique({
+          where: { keyHash },
+          select: {
+            id: true, name: true, type: true, scopes: true,
+            status: true, expiresAt: true, merchantId: true,
+            merchant: { select: { id: true, legalName: true, email: true, country: true, status: true } },
+          },
+        });
+      }
     } catch (err) {
       this.logger.error('DB error during API key lookup', err);
       throw new UnauthorizedException('Authentication service unavailable');

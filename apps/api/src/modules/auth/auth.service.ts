@@ -73,6 +73,7 @@ export class AuthService {
 
   async createApiKey(merchantId: string, dto: CreateApiKeyDto) {
     const prefix = dto.type === ApiKeyType.LIVE ? 'sk_live' : 'sk_test';
+    const pubPrefix = dto.type === ApiKeyType.LIVE ? 'pk_live' : 'pk_test';
     const secret = randomBytes(32).toString('hex');
     const rawKey = `${prefix}_${secret}`;
     const keyHash = createHash('sha256').update(rawKey).digest('hex');
@@ -97,17 +98,24 @@ export class AuthService {
     });
 
     this.logger.log(`API key created: id=${apiKey.id} prefix=${keyPrefix} merchant=${merchantId}`);
-    return { ...apiKey, rawKey };
+    const publicKey = `${pubPrefix}_${createHash('sha256').update(apiKey.id + merchantId).digest('hex').substring(0, 24)}`;
+    return { ...apiKey, rawKey, secretKey: rawKey, publicKey };
   }
 
   async listApiKeys(merchantId: string) {
-    return this.prisma.apiKey.findMany({
+    const keys = await this.prisma.apiKey.findMany({
       where: { merchantId },
       select: {
         id: true, name: true, type: true, keyPrefix: true,
         scopes: true, status: true, createdAt: true, lastUsedAt: true, expiresAt: true,
       },
       orderBy: { createdAt: 'desc' },
+    });
+
+    return keys.map((k) => {
+      const pubPrefix = k.type === ApiKeyType.LIVE ? 'pk_live' : 'pk_test';
+      const publicKey = `${pubPrefix}_${createHash('sha256').update(k.id + merchantId).digest('hex').substring(0, 24)}`;
+      return { ...k, publicKey };
     });
   }
 

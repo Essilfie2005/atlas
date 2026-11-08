@@ -7,11 +7,18 @@ interface ApiKey {
   name: string;
   type: 'TEST' | 'LIVE';
   keyPrefix: string;
+  publicKey?: string;
   status: string;
   scopes: string[];
   createdAt: string;
   lastUsedAt: string | null;
   expiresAt: string | null;
+}
+
+interface FreshKeyPair {
+  name: string;
+  secretKey: string;
+  publicKey: string;
 }
 
 interface Merchant {
@@ -57,7 +64,7 @@ export default function SettingsPage() {
   const [showCreate, setShowCreate] = useState(false);
   const [newKeyName, setNewKeyName] = useState('');
   const [creating, setCreating] = useState(false);
-  const [freshKey, setFreshKey] = useState<string | null>(null); // shown once after creation
+  const [freshKey, setFreshKey] = useState<FreshKeyPair | null>(null); // shown once after creation
   const [revoking, setRevoking] = useState<string | null>(null);
 
   // Profile form
@@ -96,8 +103,14 @@ export default function SettingsPage() {
         headers: authHeaders(),
         body: JSON.stringify({ name: newKeyName.trim(), type: 'TEST' }),
       });
-      const data = await res.json() as { data?: ApiKey & { rawKey?: string } };
-      if (data.data?.rawKey) setFreshKey(data.data.rawKey);
+      const data = await res.json() as { data?: ApiKey & { rawKey?: string; secretKey?: string; publicKey?: string } };
+      if (data.data?.rawKey || data.data?.secretKey) {
+        setFreshKey({
+          name: newKeyName.trim(),
+          secretKey: data.data.secretKey || data.data.rawKey || '',
+          publicKey: data.data.publicKey || `pk_test_${data.data.id ?? ''}`,
+        });
+      }
       setNewKeyName('');
       setShowCreate(false);
       await fetchKeys();
@@ -142,22 +155,40 @@ export default function SettingsPage() {
 
       {/* Fresh key banner — shown once after creating a key */}
       {freshKey && (
-        <div className="bg-gradient-to-r from-brand/10 to-blue-400/10 border border-brand/30 rounded-2xl p-5">
+        <div className="bg-gradient-to-r from-brand/10 to-blue-400/10 border border-brand/30 rounded-2xl p-5 space-y-4">
           <div className="flex items-start justify-between gap-4">
-            <div className="flex-1">
-              <div className="flex items-center gap-2 mb-2">
-                <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
-                <p className="text-sm font-semibold text-[#0B1F3A]">New API key created — copy it now</p>
+            <div>
+              <div className="flex items-center gap-2 mb-1">
+                <span className="w-2.5 h-2.5 bg-green-500 rounded-full animate-pulse" />
+                <p className="text-sm font-semibold text-[#0B1F3A]">New API Key Pair Created ({freshKey.name})</p>
               </div>
-              <p className="text-xs text-muted mb-3">This key will never be shown again. Store it somewhere safe like a password manager or your server&apos;s environment variables.</p>
-              <div className="flex items-center gap-3 bg-[#0B1F3A] rounded-xl px-4 py-3">
-                <code className="text-green-400 font-mono text-sm flex-1 break-all">{freshKey}</code>
-                <CopyBtn value={freshKey} />
-              </div>
+              <p className="text-xs text-muted">Copy both keys now. The Secret Key will never be displayed in full again.</p>
             </div>
-            <button onClick={() => setFreshKey(null)} className="text-muted hover:text-[#0B1F3A] mt-1">
+            <button onClick={() => setFreshKey(null)} className="text-muted hover:text-[#0B1F3A]">
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
             </button>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Public Key */}
+            <div className="bg-[#0B1F3A] rounded-xl p-4 flex flex-col justify-between gap-2">
+              <div className="flex items-center justify-between">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-blue-300">Public (Publishable) Key</span>
+                <CopyBtn value={freshKey.publicKey} />
+              </div>
+              <p className="text-[11px] text-slate-400">Client-side & mobile checkout</p>
+              <code className="text-blue-300 font-mono text-xs break-all select-all">{freshKey.publicKey}</code>
+            </div>
+
+            {/* Secret Key */}
+            <div className="bg-[#0B1F3A] rounded-xl p-4 flex flex-col justify-between gap-2">
+              <div className="flex items-center justify-between">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-amber-300">Secret Key</span>
+                <CopyBtn value={freshKey.secretKey} />
+              </div>
+              <p className="text-[11px] text-slate-400">Server-side API authentication</p>
+              <code className="text-amber-300 font-mono text-xs break-all select-all">{freshKey.secretKey}</code>
+            </div>
           </div>
         </div>
       )}
@@ -212,6 +243,16 @@ export default function SettingsPage() {
               </div>
             )}
 
+            {/* Developer Guide Callout */}
+            <div className="px-6 py-3 bg-blue-50/70 border-b border-blue-100 flex items-center gap-3">
+              <div className="w-5 h-5 rounded-full bg-brand/10 text-brand flex items-center justify-center shrink-0">
+                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+              </div>
+              <p className="text-xs text-slate-600 leading-normal">
+                Use your <strong className="text-brand font-semibold">Public Key</strong> in frontend web & mobile apps to initiate checkout. Keep your <strong className="text-slate-800 font-semibold">Secret Key</strong> confidential on your backend server.
+              </p>
+            </div>
+
             {/* Keys list */}
             {loadingKeys ? (
               <div className="p-6 space-y-3">
@@ -228,28 +269,45 @@ export default function SettingsPage() {
             ) : (
               <div className="divide-y divide-border">
                 {keys.filter(k => k.type === 'TEST' && k.status === 'ACTIVE').map(key => (
-                  <div key={key.id} className="px-6 py-4 flex items-center gap-4 hover:bg-page-bg/50 transition-colors">
-                    <div className="w-9 h-9 bg-brand/10 rounded-lg flex items-center justify-center shrink-0">
-                      <svg className="w-4 h-4 text-brand" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" /></svg>
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-0.5">
-                        <p className="text-sm font-semibold text-[#0B1F3A] truncate">{key.name}</p>
-                        <span className="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase bg-blue-100 text-blue-700">TEST</span>
-                      </div>
+                  <div key={key.id} className="px-6 py-5 hover:bg-page-bg/40 transition-colors">
+                    <div className="flex items-start justify-between gap-4 mb-3">
                       <div className="flex items-center gap-3">
-                        <code className="text-xs text-muted font-mono">{key.keyPrefix}••••••••••••••••••••••••</code>
-                        <CopyBtn value={key.keyPrefix} />
+                        <div className="w-9 h-9 bg-brand/10 rounded-lg flex items-center justify-center shrink-0">
+                          <svg className="w-4 h-4 text-brand" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" /></svg>
+                        </div>
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <p className="text-sm font-semibold text-[#0B1F3A]">{key.name}</p>
+                            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase bg-blue-100 text-blue-700">TEST</span>
+                          </div>
+                          <p className="text-xs text-muted">Created {timeAgo(key.createdAt)} {key.lastUsedAt ? `• Last used ${timeAgo(key.lastUsedAt)}` : '• Never used'}</p>
+                        </div>
+                      </div>
+                      <button onClick={() => revokeKey(key.id)} disabled={revoking === key.id}
+                        className="px-3 py-1.5 rounded-lg text-xs font-medium text-red-500 hover:bg-red-50 transition-colors border border-red-200 disabled:opacity-50">
+                        {revoking === key.id ? 'Revoking…' : 'Revoke'}
+                      </button>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pl-12">
+                      {/* Public Key */}
+                      <div className="bg-slate-50 border border-slate-200/80 rounded-xl p-3 flex flex-col justify-between gap-1.5">
+                        <div className="flex items-center justify-between">
+                          <span className="text-[10px] font-bold uppercase tracking-wider text-blue-700 bg-blue-100/70 px-2 py-0.5 rounded-md">Public Key (Publishable)</span>
+                          <CopyBtn value={key.publicKey || `pk_test_${key.id}`} />
+                        </div>
+                        <code className="text-xs font-mono text-slate-800 break-all select-all font-medium">{key.publicKey || `pk_test_${key.id}`}</code>
+                      </div>
+
+                      {/* Secret Key */}
+                      <div className="bg-slate-50 border border-slate-200/80 rounded-xl p-3 flex flex-col justify-between gap-1.5">
+                        <div className="flex items-center justify-between">
+                          <span className="text-[10px] font-bold uppercase tracking-wider text-slate-700 bg-slate-200/70 px-2 py-0.5 rounded-md">Secret Key</span>
+                          <CopyBtn value={key.keyPrefix} />
+                        </div>
+                        <code className="text-xs font-mono text-slate-500 break-all">{key.keyPrefix}••••••••••••••••••••••••</code>
                       </div>
                     </div>
-                    <div className="text-right shrink-0">
-                      <p className="text-xs text-muted">{key.lastUsedAt ? `Last used ${timeAgo(key.lastUsedAt)}` : 'Never used'}</p>
-                      <p className="text-xs text-muted">Created {timeAgo(key.createdAt)}</p>
-                    </div>
-                    <button onClick={() => revokeKey(key.id)} disabled={revoking === key.id}
-                      className="px-3 py-1.5 rounded-lg text-xs font-medium text-red-500 hover:bg-red-50 transition-colors border border-red-200 disabled:opacity-50">
-                      {revoking === key.id ? 'Revoking…' : 'Revoke'}
-                    </button>
                   </div>
                 ))}
               </div>
