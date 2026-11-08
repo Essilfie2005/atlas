@@ -1,0 +1,31 @@
+{
+  "name": "@atlas/adapters-paystack",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Atlas Paystack provider adapter — Ghana and Nigeria",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "require": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "dev": "tsc -p tsconfig.json --watch",
+    "clean": "rimraf dist",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@atlas/adapters": "workspace:*",
+    "@atlas/core": "workspace:*",
+    "axios": "^1.7.4"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "rimraf": "^6.0.1",
+    "typescript": "^5.5.4"
+  }
+}

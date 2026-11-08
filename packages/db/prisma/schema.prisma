@@ -1,0 +1,611 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// =============================================================================
+// ENUMS
+// =============================================================================
+
+enum MerchantStatus {
+  PENDING_REVIEW
+  ACTIVE
+  SUSPENDED
+  TERMINATED
+}
+
+enum RiskProfile {
+  LOW
+  MEDIUM
+  HIGH
+  VERY_HIGH
+}
+
+enum ApiKeyType {
+  TEST
+  LIVE
+}
+
+enum ApiKeyStatus {
+  ACTIVE
+  REVOKED
+  EXPIRED
+}
+
+enum PaymentIntentStatus {
+  CREATED
+  PENDING
+  PROCESSING
+  REQUIRES_ACTION
+  SUCCEEDED
+  FAILED
+  CANCELLED
+}
+
+enum PaymentAttemptStatus {
+  PENDING
+  PROCESSING
+  SUCCEEDED
+  FAILED
+  REVERSED
+}
+
+enum PayoutStatus {
+  CREATED
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+  CANCELLED
+  REVERSED
+}
+
+enum LedgerEntryType {
+  CREDIT
+  DEBIT
+}
+
+enum LedgerEntryStatus {
+  PENDING
+  SETTLED
+  REVERSED
+}
+
+enum SettlementStatus {
+  PENDING
+  MATCHED
+  MISMATCHED
+  EXCEPTION
+}
+
+enum WebhookEventStatus {
+  PENDING
+  DELIVERED
+  FAILED
+  SKIPPED
+}
+
+// =============================================================================
+// MODELS
+// =============================================================================
+
+/// Merchant represents a business entity using the ATLAS platform.
+model Merchant {
+  id             String         @id @default(cuid())
+  legalName      String
+  status         MerchantStatus @default(ACTIVE)
+  country        String         @default("GH")
+  riskProfile    RiskProfile    @default(LOW)
+  email          String         @unique
+  passwordHash   String?
+  website        String?
+  webhookUrl     String?
+  webhookSecret  String?
+  metadata       Json           @default("{}")
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+
+  // Relations
+  apiKeys        ApiKey[]
+  customers      Customer[]
+  paymentIntents PaymentIntent[]
+  beneficiaries  Beneficiary[]
+  payouts        Payout[]
+  ledgerEntries  LedgerEntry[]
+  settlements    Settlement[]
+  webhookEvents  WebhookEvent[]
+  auditLogs      AuditLog[]
+  refunds        Refund[]
+  disputes       Dispute[]
+  paymentPages   PaymentPage[]
+  subscriptions  Subscription[]
+  splitPayments  SplitPayment[]
+
+  @@index([status])
+  @@index([country])
+  @@index([email])
+  @@map("merchants")
+}
+
+/// ApiKey represents an API credential issued to a Merchant.
+model ApiKey {
+  id         String       @id @default(cuid())
+  merchantId String
+  name       String
+  keyHash    String       @unique  // SHA-256 hash of the raw key — NEVER store plaintext
+  keyPrefix  String                // First 16 chars of the raw key for display (e.g. "sk_test_abc1234")
+  type       ApiKeyType
+  status     ApiKeyStatus @default(ACTIVE)
+  scopes     String[]     @default([])
+  lastUsedAt DateTime?
+  expiresAt  DateTime?
+  createdAt  DateTime     @default(now())
+  revokedAt  DateTime?
+
+  merchant Merchant @relation(fields: [merchantId], references: [id], onDelete: Cascade)
+
+  @@index([merchantId])
+  @@index([status])
+  @@index([type])
+  @@index([expiresAt])
+  @@map("api_keys")
+}
+
+/// Customer represents an end-user of a Merchant's platform.
+model Customer {
+  id                String   @id @default(cuid())
+  merchantId        String
+  externalReference String?
+  email             String?
+  phone             String?
+  name              String?
+  metadata          Json     @default("{}")
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  merchant       Merchant        @relation(fields: [merchantId], references: [id], onDelete: Cascade)
+  paymentIntents PaymentIntent[]
+  subscriptions  Subscription[]
+
+  @@unique([merchantId, externalReference])
+  @@index([merchantId])
+  @@index([email])
+  @@map("customers")
+}
+
+/// PaymentIntent represents a merchant's intent to collect a payment.
+model PaymentIntent {
+  id                     String              @id @default(cuid())
+  merchantId             String
+  customerId             String?
+  amount                 BigInt                         // Minor units (e.g. pesewas for GHS)
+  currency               String                         // ISO 4217
+  status                 PaymentIntentStatus @default(CREATED)
+  idempotencyKey         String                         // Unique per merchant — see @@unique below
+  providerTransactionId  String?
+  description            String?
+  metadata               Json                @default("{}")
+  returnUrl              String?
+  cancelledAt            DateTime?
+  succeededAt            DateTime?
+  failedAt               DateTime?
+  createdAt              DateTime            @default(now())
+  updatedAt              DateTime            @updatedAt
+
+  merchant      Merchant         @relation(fields: [merchantId], references: [id], onDelete: Restrict)
+  customer      Customer?        @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  attempts      PaymentAttempt[]
+  webhookEvents WebhookEvent[]
+  ledgerEntries LedgerEntry[]
+  refunds       Refund[]
+  disputes      Dispute[]
+
+  @@index([merchantId])
+  @@index([customerId])
+  @@index([status])
+  @@index([currency])
+  @@index([createdAt])
+  @@unique([merchantId, idempotencyKey])  // Idempotency is scoped per merchant
+  @@map("payment_intents")
+}
+
+/// PaymentAttempt records a single provider-level attempt to charge for a PaymentIntent.
+model PaymentAttempt {
+  id                    String               @id @default(cuid())
+  paymentIntentId       String
+  provider              String                         // e.g. "paystack"
+  providerTransactionId String?
+  providerStatus        String?
+  status                PaymentAttemptStatus @default(PENDING)
+  providerPaymentMethod Json                 @default("{}")
+  providerResponse      Json                 @default("{}")
+  errorCode             String?
+  errorMessage          String?
+  processedAt           DateTime?
+  createdAt             DateTime             @default(now())
+  updatedAt             DateTime             @updatedAt
+
+  paymentIntent PaymentIntent @relation(fields: [paymentIntentId], references: [id], onDelete: Cascade)
+
+  @@index([paymentIntentId])
+  @@index([provider])
+  @@index([status])
+  @@map("payment_attempts")
+}
+
+/// Beneficiary represents a bank account or mobile money wallet for payouts.
+model Beneficiary {
+  id            String   @id @default(cuid())
+  merchantId    String
+  name          String
+  accountType   String             // "bank_account" or "mobile_money"
+  accountNumber String
+  bankCode      String?
+  mobileNetwork String?
+  currency      String?
+  country       String   @default("GH")
+  status        String   @default("ACTIVE")
+  metadata      Json     @default("{}")
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  merchant Merchant @relation(fields: [merchantId], references: [id], onDelete: Cascade)
+  payouts  Payout[]
+
+  @@index([merchantId])
+  @@index([country])
+  @@map("beneficiaries")
+}
+
+/// Payout represents a disbursement to a Beneficiary.
+model Payout {
+  id                    String      @id @default(cuid())
+  merchantId            String
+  beneficiaryId         String
+  amount                BigInt                  // Minor units
+  currency              String
+  status                PayoutStatus @default(CREATED)
+  idempotencyKey        String                  // Unique per merchant — see @@unique below
+  provider              String
+  providerTransactionId String?
+  providerResponse      Json         @default("{}")
+  description           String?
+  metadata              Json         @default("{}")
+  processedAt           DateTime?
+  createdAt             DateTime     @default(now())
+  updatedAt             DateTime     @updatedAt
+
+  merchant      Merchant      @relation(fields: [merchantId], references: [id], onDelete: Restrict)
+  beneficiary   Beneficiary   @relation(fields: [beneficiaryId], references: [id], onDelete: Restrict)
+  ledgerEntries LedgerEntry[]
+
+  @@index([merchantId])
+  @@index([beneficiaryId])
+  @@index([status])
+  @@index([currency])
+  @@index([createdAt])
+  @@unique([merchantId, idempotencyKey])  // Idempotency is scoped per merchant
+  @@map("payouts")
+}
+
+/// LedgerEntry is APPEND-ONLY. Never UPDATE or DELETE.
+model LedgerEntry {
+  id            String            @id @default(cuid())
+  merchantId    String
+  transactionId String?           // PaymentIntent.id
+  payoutId      String?           // Payout.id
+  type          LedgerEntryType
+  status        LedgerEntryStatus @default(PENDING)
+  amount        BigInt            // Always positive minor units
+  currency      String
+  description   String?
+  metadata      Json              @default("{}")
+  createdAt     DateTime          @default(now())
+  // No updatedAt — this record is IMMUTABLE
+
+  merchant      Merchant       @relation(fields: [merchantId], references: [id], onDelete: Restrict)
+  paymentIntent PaymentIntent? @relation(fields: [transactionId], references: [id], onDelete: Restrict)
+  payout        Payout?        @relation(fields: [payoutId], references: [id], onDelete: Restrict)
+
+  @@index([merchantId])
+  @@index([transactionId])
+  @@index([payoutId])
+  @@index([type])
+  @@index([status])
+  @@index([currency])
+  @@index([createdAt])
+  @@map("ledger_entries")
+}
+
+/// Settlement represents a reconciliation record for provider settlements.
+model Settlement {
+  id             String           @id @default(cuid())
+  merchantId     String
+  provider       String
+  periodStart    DateTime
+  periodEnd      DateTime
+  expectedAmount BigInt
+  actualAmount   BigInt?
+  currency       String
+  status         SettlementStatus @default(PENDING)
+  rawReport      Json             @default("{}")
+  notes          String?
+  entryCount     Int?
+  reconciledAt   DateTime?
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+
+  merchant Merchant @relation(fields: [merchantId], references: [id], onDelete: Restrict)
+
+  @@index([merchantId])
+  @@index([provider])
+  @@index([status])
+  @@index([periodStart, periodEnd])
+  @@map("settlements")
+}
+
+/// WebhookEvent represents an outbound webhook notification to a merchant endpoint.
+model WebhookEvent {
+  id              String             @id @default(cuid())
+  merchantId      String
+  paymentIntentId String?
+  eventType       String
+  payload         Json
+  status          WebhookEventStatus @default(PENDING)
+  attemptCount    Int                @default(0)
+  lastAttemptAt   DateTime?
+  nextRetryAt     DateTime?
+  createdAt       DateTime           @default(now())
+  updatedAt       DateTime           @updatedAt
+
+  merchant      Merchant          @relation(fields: [merchantId], references: [id], onDelete: Cascade)
+  paymentIntent PaymentIntent?    @relation(fields: [paymentIntentId], references: [id], onDelete: SetNull)
+  deliveries    WebhookDelivery[]
+
+  @@index([merchantId])
+  @@index([paymentIntentId])
+  @@index([status])
+  @@index([nextRetryAt])
+  @@index([eventType])
+  @@map("webhook_events")
+}
+
+/// WebhookDelivery records each HTTP delivery attempt.
+model WebhookDelivery {
+  id             String   @id @default(cuid())
+  webhookEventId String
+  success        Boolean  @default(false)
+  statusCode     Int?
+  responseBody   String?
+  errorMessage   String?
+  attemptNumber  Int
+  deliveredAt    DateTime @default(now())
+
+  webhookEvent WebhookEvent @relation(fields: [webhookEventId], references: [id], onDelete: Cascade)
+
+  @@index([webhookEventId])
+  @@index([success])
+  @@map("webhook_deliveries")
+}
+
+/// AuditLog records every sensitive action.
+model AuditLog {
+  id         String   @id @default(cuid())
+  merchantId String?
+  action     String
+  actorId    String
+  actorType  String
+  resource   String
+  resourceId String
+  changes    Json     @default("{}")
+  ipAddress  String?
+  userAgent  String?
+  createdAt  DateTime @default(now())
+
+  merchant Merchant? @relation(fields: [merchantId], references: [id], onDelete: SetNull)
+
+  @@index([merchantId])
+  @@index([actorId])
+  @@index([resource, resourceId])
+  @@index([action])
+  @@index([createdAt])
+  @@map("audit_logs")
+}
+
+enum RefundStatus {
+  PENDING
+  PROCESSING
+  SUCCEEDED
+  FAILED
+  CANCELLED
+}
+
+enum RefundReason {
+  DUPLICATE
+  FRAUDULENT
+  CUSTOMER_REQUEST
+  OTHER
+}
+
+enum DisputeStatus {
+  OPEN
+  UNDER_REVIEW
+  WON
+  LOST
+  CLOSED
+}
+
+enum DisputeReason {
+  FRAUDULENT
+  NOT_AS_DESCRIBED
+  NOT_RECEIVED
+  DUPLICATE
+  SUBSCRIPTION_CANCELLED
+  OTHER
+}
+
+enum PaymentPageStatus {
+  ACTIVE
+  INACTIVE
+  ARCHIVED
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  PAUSED
+  CANCELLED
+  EXPIRED
+  PAST_DUE
+}
+
+enum SubscriptionInterval {
+  DAILY
+  WEEKLY
+  MONTHLY
+  QUARTERLY
+  YEARLY
+}
+
+/// Refund represents a reversal of a PaymentIntent.
+model Refund {
+  id              String       @id @default(cuid())
+  merchantId      String
+  paymentIntentId String
+  amount          BigInt
+  currency        String
+  status          RefundStatus @default(PENDING)
+  reason          RefundReason @default(CUSTOMER_REQUEST)
+  description     String?
+  providerRefundId String?
+  providerResponse Json       @default("{}")
+  processedAt     DateTime?
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+
+  merchant      Merchant      @relation(fields: [merchantId], references: [id], onDelete: Restrict)
+  paymentIntent PaymentIntent @relation(fields: [paymentIntentId], references: [id], onDelete: Restrict)
+
+  @@index([merchantId])
+  @@index([paymentIntentId])
+  @@index([status])
+  @@index([createdAt])
+  @@map("refunds")
+}
+
+/// Dispute represents a chargeback or payment dispute.
+model Dispute {
+  id              String        @id @default(cuid())
+  merchantId      String
+  paymentIntentId String?
+  amount          BigInt
+  currency        String
+  status          DisputeStatus @default(OPEN)
+  reason          DisputeReason @default(OTHER)
+  description     String?
+  evidenceDue     DateTime?
+  evidence        Json          @default("{}")
+  resolvedAt      DateTime?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  merchant      Merchant       @relation(fields: [merchantId], references: [id], onDelete: Restrict)
+  paymentIntent PaymentIntent? @relation(fields: [paymentIntentId], references: [id], onDelete: SetNull)
+
+  @@index([merchantId])
+  @@index([paymentIntentId])
+  @@index([status])
+  @@index([createdAt])
+  @@map("disputes")
+}
+
+/// PaymentPage is a hosted no-code payment page.
+model PaymentPage {
+  id          String            @id @default(cuid())
+  merchantId  String
+  name        String
+  slug        String            @unique
+  description String?
+  amount      BigInt?           // null = customer enters amount
+  currency    String            @default("GHS")
+  status      PaymentPageStatus @default(ACTIVE)
+  logoUrl     String?
+  redirectUrl String?
+  metadata    Json              @default("{}")
+  viewCount   Int               @default(0)
+  paymentCount Int              @default(0)
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+
+  merchant Merchant @relation(fields: [merchantId], references: [id], onDelete: Cascade)
+
+  @@index([merchantId])
+  @@index([status])
+  @@index([slug])
+  @@map("payment_pages")
+}
+
+/// Subscription represents a recurring payment plan.
+model Subscription {
+  id            String               @id @default(cuid())
+  merchantId    String
+  customerId    String?
+  planName      String
+  amount        BigInt
+  currency      String
+  interval      SubscriptionInterval
+  status        SubscriptionStatus   @default(ACTIVE)
+  startDate     DateTime
+  nextChargeAt  DateTime?
+  cancelledAt   DateTime?
+  metadata      Json                 @default("{}")
+  createdAt     DateTime             @default(now())
+  updatedAt     DateTime             @updatedAt
+
+  merchant Merchant  @relation(fields: [merchantId], references: [id], onDelete: Cascade)
+  customer Customer? @relation(fields: [customerId], references: [id], onDelete: SetNull)
+
+  @@index([merchantId])
+  @@index([customerId])
+  @@index([status])
+  @@index([nextChargeAt])
+  @@map("subscriptions")
+}
+
+/// SplitPayment defines how a payment should be split between parties.
+model SplitPayment {
+  id              String   @id @default(cuid())
+  merchantId      String
+  paymentIntentId String?  @unique
+  name            String
+  currency        String
+  totalAmount     BigInt
+  metadata        Json     @default("{}")
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  merchant      Merchant                 @relation(fields: [merchantId], references: [id], onDelete: Cascade)
+  participants  SplitPaymentParticipant[]
+
+  @@index([merchantId])
+  @@map("split_payments")
+}
+
+/// SplitPaymentParticipant defines one party in a split.
+model SplitPaymentParticipant {
+  id             String   @id @default(cuid())
+  splitPaymentId String
+  beneficiaryId  String
+  sharePercent   Decimal?
+  fixedAmount    BigInt?
+  status         String   @default("PENDING")
+  createdAt      DateTime @default(now())
+
+  splitPayment SplitPayment @relation(fields: [splitPaymentId], references: [id], onDelete: Cascade)
+
+  @@index([splitPaymentId])
+  @@map("split_payment_participants")
+}
