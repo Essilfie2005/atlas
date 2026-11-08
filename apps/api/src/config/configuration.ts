@@ -5,6 +5,7 @@ export interface AppConfig {
   redis: { url: string };
   rabbitmq: { url: string };
   atlas: { signingSecret: string; apiVersion: string };
+  paystack: { secretKey: string; publicKey: string };
   cors: { origins: string[] };
 }
 
@@ -23,6 +24,10 @@ export default (): AppConfig => ({
   atlas: {
     signingSecret: process.env.ATLAS_SIGNING_SECRET ?? 'change-me-in-production',
     apiVersion: process.env.ATLAS_API_VERSION ?? '2024-01-01',
+  },
+  paystack: {
+    secretKey: process.env.PAYSTACK_SECRET_KEY ?? '',
+    publicKey: process.env.PAYSTACK_PUBLIC_KEY ?? '',
   },
   cors: {
     origins: (process.env.CORS_ORIGINS ?? '').split(',').filter(Boolean),
