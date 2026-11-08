@@ -58,14 +58,18 @@ export default function TransactionsPage() {
     setLoading(true);
     try {
       const query = new URLSearchParams({
+        page: String(page),
+        limit: String(PAGE_SIZE),
         take: String(PAGE_SIZE),
         skip: String((page - 1) * PAGE_SIZE),
         ...(search ? { search } : {}),
         ...(status ? { status } : {}),
       });
-      const res = await apiFetch(`/v1/payment-intents?${query.toString()}`);
-      setTransactions((res as any)?.items || []);
-      setTotal((res as any)?.total || 0);
+      const res = await apiFetch<any>(`/v1/payment-intents?${query.toString()}`);
+      const items = res?.items ?? res?.data ?? [];
+      const totalCount = res?.pagination?.total ?? res?.total ?? items.length;
+      setTransactions(items);
+      setTotal(totalCount);
     } catch (e: any) {
       toastError('Failed to load transactions', e?.message);
     } finally {
@@ -76,9 +80,16 @@ export default function TransactionsPage() {
   const handleExport = async () => {
     setExporting(true);
     try {
-      const query = new URLSearchParams({ take: '1000', skip: '0', ...(status ? { status } : {}), ...(search ? { search } : {}) });
-      const res = await apiFetch(`/v1/payment-intents?${query.toString()}`);
-      const rows = (res as any)?.items || [];
+      const query = new URLSearchParams({
+        page: '1',
+        limit: '100',
+        take: '100',
+        skip: '0',
+        ...(status ? { status } : {}),
+        ...(search ? { search } : {})
+      });
+      const res = await apiFetch<any>(`/v1/payment-intents?${query.toString()}`);
+      const rows = res?.items ?? res?.data ?? [];
       if (rows.length === 0) { toastError('No data to export', 'There are no transactions matching your current filters.'); return; }
       downloadCSV(rows);
       success('Export ready', `${rows.length} transactions downloaded as CSV`);

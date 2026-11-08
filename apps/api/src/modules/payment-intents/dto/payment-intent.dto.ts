@@ -54,10 +54,22 @@ export class ListPaymentIntentsDto {
   limit?: number = 20;
 
   @ApiPropertyOptional()
+  @IsOptional() @IsNumber() @Min(1) @Max(100) @Type(() => Number)
+  take?: number;
+
+  @ApiPropertyOptional()
+  @IsOptional() @IsNumber() @Min(0) @Type(() => Number)
+  skip?: number;
+
+  @ApiPropertyOptional()
   @IsOptional() @IsString()
   status?: string;
 
   @ApiPropertyOptional()
   @IsOptional() @IsString()
   currency?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional() @IsString()
+  search?: string;
 }

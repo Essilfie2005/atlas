@@ -261,13 +261,22 @@ export class PaymentIntentsService {
   }
 
   async list(merchantId: string, query: ListPaymentIntentsDto) {
-    const page = query.page ?? 1;
-    const limit = query.limit ?? 20;
-    const skip = (page - 1) * limit;
+    const limit = query.take ?? query.limit ?? 20;
+    const skip = query.skip ?? ((query.page ?? 1) - 1) * limit;
+    const page = query.page ?? Math.floor(skip / limit) + 1;
     const where: Prisma.PaymentIntentWhereInput = {
       merchantId,
       ...(query.status ? { status: query.status as PaymentIntentStatus } : {}),
       ...(query.currency ? { currency: query.currency.toUpperCase() } : {}),
+      ...(query.search
+        ? {
+            OR: [
+              { id: { contains: query.search, mode: 'insensitive' } },
+              { customer: { email: { contains: query.search, mode: 'insensitive' } } },
+              { description: { contains: query.search, mode: 'insensitive' } },
+            ],
+          }
+        : {}),
     };
     const [items, total] = await Promise.all([
       this.prisma.paymentIntent.findMany({
@@ -275,8 +284,11 @@ export class PaymentIntentsService {
       }),
       this.prisma.paymentIntent.count({ where }),
     ]);
+    const serialized = items.map((i) => this.serialize(i));
     return {
-      items: items.map((i) => this.serialize(i)),
+      items: serialized,
+      data: serialized,
+      total,
       pagination: { page, limit, total, totalPages: Math.ceil(total / limit) },
     };
   }

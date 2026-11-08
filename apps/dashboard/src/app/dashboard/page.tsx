@@ -16,15 +16,18 @@ export default function DashboardPage() {
       try {
         const [merchantRes, recentTxRes, countRes]: [any, any, any] = await Promise.all([
           apiFetch('/v1/merchants/me').catch(() => null),
-          apiFetch('/v1/payment-intents?take=5').catch(() => ({ data: [] })),
-          apiFetch('/v1/payment-intents?take=1').catch(() => ({ total: 0 }))
+          apiFetch('/v1/payment-intents?limit=5&take=5').catch(() => ({ items: [], data: [] })),
+          apiFetch('/v1/payment-intents?limit=1&take=1').catch(() => ({ total: 0, pagination: { total: 0 } }))
         ]);
         
-        setMerchant(merchantRes);
-        setRecentTransactions(recentTxRes?.data || []);
-        setTotalTransactions(countRes?.total || 0);
+        const recentItems = recentTxRes?.items ?? recentTxRes?.data ?? [];
+        const totalCount = countRes?.pagination?.total ?? countRes?.total ?? 0;
         
-        const totalVol = (recentTxRes?.data || []).reduce((acc: number, tx: any) => acc + (tx.amount || 0), 0);
+        setMerchant(merchantRes);
+        setRecentTransactions(recentItems);
+        setTotalTransactions(totalCount);
+        
+        const totalVol = recentItems.reduce((acc: number, tx: any) => acc + (tx.amount || 0), 0);
         setVolume(totalVol);
       } catch (error) {
         console.error('Error loading dashboard data', error);
