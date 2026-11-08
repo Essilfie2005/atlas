@@ -43,8 +43,11 @@ async function bootstrap() {
   });
 
   // CORS
+  const configuredOrigins = configService.get<string[]>('cors.origins') ?? [];
+  const corsOrigin = configuredOrigins.length > 0 ? configuredOrigins : true;
+
   app.enableCors({
-    origin: nodeEnv === 'production' ? configService.get('cors.origins') : '*',
+    origin: corsOrigin,
     methods: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: [
       'Content-Type',
