@@ -16,7 +16,12 @@ const STATUS_STYLES: Record<string, string> = {
 };
 
 function formatAmount(amount: number, currency = 'GHS') {
-  return new Intl.NumberFormat('en-GH', { style: 'currency', currency }).format(amount / 100);
+  const c = currency || 'GHS';
+  if (c === 'GHS') return `GH₵ ${(Number(amount) / 100).toFixed(2)}`;
+  if (c === 'NGN') return `₦ ${(Number(amount) / 100).toFixed(2)}`;
+  if (c === 'KES') return `KSh ${(Number(amount) / 100).toFixed(2)}`;
+  if (c === 'ZAR') return `R ${(Number(amount) / 100).toFixed(2)}`;
+  return `$ ${(Number(amount) / 100).toFixed(2)}`;
 }
 
 function downloadCSV(rows: any[]) {

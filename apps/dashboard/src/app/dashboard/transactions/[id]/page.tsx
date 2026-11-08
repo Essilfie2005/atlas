@@ -84,7 +84,8 @@ export default function TransactionDetailPage() {
 
   const status = STATUS_STYLES[tx.status] ?? DEFAULT_STATUS_STYLE;
   const amount = typeof tx.amount === 'bigint' ? Number(tx.amount) : Number(tx.amount ?? 0);
-  const formatted = new Intl.NumberFormat('en-GH', { style: 'currency', currency: tx.currency || 'GHS' }).format(amount / 100);
+  const c = tx.currency || 'GHS';
+  const formatted = c === 'GHS' ? `GH₵ ${(amount / 100).toFixed(2)}` : `${c} ${(amount / 100).toFixed(2)}`;
   const attempts = tx.attempts ?? tx.paymentAttempts ?? [];
   const currentStep = TIMELINE_STEPS.indexOf(tx.status);
 
