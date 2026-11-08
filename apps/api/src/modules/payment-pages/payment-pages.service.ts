@@ -26,7 +26,7 @@ export class PaymentPagesService {
       },
     });
     this.logger.log(`Payment page created: id=${page.id} slug=${page.slug} merchant=${merchantId}`);
-    return page;
+    return this.serialize(page);
   }
 
   async findAll(merchantId: string, params: { skip?: number; take?: number }) {
@@ -38,20 +38,20 @@ export class PaymentPagesService {
         orderBy: { createdAt: 'desc' },
       }),
     ]);
-    return { items, total, page: Math.floor((params.skip ?? 0) / (params.take ?? 20)) + 1 };
+    return { items: items.map(p => this.serialize(p)), total, page: Math.floor((params.skip ?? 0) / (params.take ?? 20)) + 1 };
   }
 
   async findOne(merchantId: string, id: string) {
     const page = await this.prisma.paymentPage.findFirst({ where: { id, merchantId } });
     if (!page) throw new NotFoundException(`PaymentPage ${id} not found`);
-    return page;
+    return this.serialize(page);
   }
   
   async update(merchantId: string, id: string, data: any) {
     await this.findOne(merchantId, id);
     const updated = await this.prisma.paymentPage.update({ where: { id }, data });
     this.logger.log(`Payment page updated: id=${id}`);
-    return updated;
+    return this.serialize(updated);
   }
 
   async delete(merchantId: string, id: string) {
@@ -69,7 +69,15 @@ export class PaymentPagesService {
       },
     });
     if (!page) throw new NotFoundException(`Payment page "${slug}" not found or inactive`);
-    return page;
+    return this.serialize(page);
+  }
+
+  private serialize(page: any) {
+    if (!page) return page;
+    return {
+      ...page,
+      amount: page.amount != null ? Number(page.amount) : null,
+    };
   }
 
   /** Public — creates a PaymentIntent and returns Paystack reference for the popup */

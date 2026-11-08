@@ -16,6 +16,25 @@ export interface ApiResponse<T> {
   };
 }
 
+function serializeBigInts(value: any): any {
+  if (value === null || value === undefined) return value;
+  if (typeof value === 'bigint') {
+    const num = Number(value);
+    return Number.isSafeInteger(num) ? num : value.toString();
+  }
+  if (Array.isArray(value)) {
+    return value.map(serializeBigInts);
+  }
+  if (typeof value === 'object' && !(value instanceof Date)) {
+    const result: Record<string, any> = {};
+    for (const key of Object.keys(value)) {
+      result[key] = serializeBigInts(value[key]);
+    }
+    return result;
+  }
+  return value;
+}
+
 @Injectable()
 export class TransformInterceptor<T>
   implements NestInterceptor<T, ApiResponse<T>>
@@ -36,7 +55,7 @@ export class TransformInterceptor<T>
 
     return next.handle().pipe(
       map((data) => ({
-        data,
+        data: serializeBigInts(data),
         meta: {
           requestId,
           timestamp: new Date().toISOString(),

@@ -14,6 +14,12 @@ import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
 
 const startupLogger = new Logger('Bootstrap');
 
+// Universal BigInt serialization for Prisma and Fastify JSON responses
+(BigInt.prototype as any).toJSON = function () {
+  const int = Number(this);
+  return Number.isSafeInteger(int) ? int : this.toString();
+};
+
 // ── C3: Guard against weak JWT secret in production ──────────────────────────
 const JWT_SECRET = process.env.ATLAS_SIGNING_SECRET ?? '';
 const DEFAULT_SECRET = 'atlas-dev-signing-secret-change-in-production';
