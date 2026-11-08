@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import { apiFetch } from '@/lib/api-client';
 import { useToast } from '@/components/toast';
 import { Search, ArrowUpRight, Activity, Download } from 'lucide-react';
+import { formatMoney } from '@/lib/currency';
 
 const STATUS_STYLES: Record<string, string> = {
   SUCCEEDED: 'bg-emerald-50 text-emerald-700 border border-emerald-200',
@@ -190,7 +191,7 @@ export default function TransactionsPage() {
                     className="hover:bg-blue-50/40 cursor-pointer transition-colors group"
                   >
                     <td className="px-6 py-4 font-semibold text-slate-900">
-                      {formatAmount(tx.amount, tx.currency)}
+                      {formatMoney(tx.amount, tx.currency)}
                     </td>
                     <td className="px-6 py-4">
                       <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold ${STATUS_STYLES[tx.status] ?? 'bg-slate-100 text-slate-500'}`}>

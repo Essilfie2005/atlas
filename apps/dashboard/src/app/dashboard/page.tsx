@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { apiFetch } from '@/lib/api-client';
 import { Activity, DollarSign } from 'lucide-react';
+import { formatMoney, getMerchantDefaultCurrency, getCurrencySymbol } from '@/lib/currency';
 
 export default function DashboardPage() {
   const [merchant, setMerchant] = useState<any>(null);
@@ -52,19 +53,20 @@ export default function DashboardPage() {
     );
   }
 
-  const currencySymbol = recentTransactions[0]?.currency === 'GHS' || !recentTransactions[0]?.currency ? 'GH₵' : recentTransactions[0]?.currency;
+  const merchantCurrency = getMerchantDefaultCurrency(merchant?.country);
+  const primaryCurrency = recentTransactions[0]?.currency || merchantCurrency;
 
   return (
     <div className="p-6 space-y-6 max-w-7xl mx-auto">
-      <h1 className="text-2xl font-bold">Welcome back{merchant?.name ? `, ${merchant.name}` : ''}</h1>
+      <h1 className="text-2xl font-bold">Welcome back{merchant?.legalName || merchant?.name ? `, ${merchant.legalName || merchant.name}` : ''}</h1>
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="bg-white p-6 rounded-lg border shadow-sm">
           <div className="flex items-center justify-between pb-2">
             <h3 className="text-sm font-medium text-gray-500">Total Volume (Recent)</h3>
-            <span className="text-xs font-semibold text-slate-400">{currencySymbol}</span>
+            <span className="text-xs font-semibold text-slate-400">{getCurrencySymbol(primaryCurrency)}</span>
           </div>
-          <div className="text-2xl font-bold">{currencySymbol} {(Number(volume) / 100).toFixed(2)}</div>
+          <div className="text-2xl font-bold">{formatMoney(volume, primaryCurrency)}</div>
         </div>
         <div className="bg-white p-6 rounded-lg border shadow-sm">
           <div className="flex items-center justify-between pb-2">
@@ -99,7 +101,7 @@ export default function DashboardPage() {
                   {recentTransactions.map((tx: any) => (
                     <tr key={tx.id} className="border-b last:border-0">
                       <td className="px-6 py-4 font-semibold text-slate-900">
-                        {tx.currency === 'GHS' || !tx.currency ? 'GH₵' : tx.currency} {(Number(tx.amount) / 100).toFixed(2)}
+                        {formatMoney(tx.amount, tx.currency)}
                       </td>
                       <td className="px-6 py-4">
                         <span className={`px-2.5 py-1 rounded-full text-xs font-semibold border ${

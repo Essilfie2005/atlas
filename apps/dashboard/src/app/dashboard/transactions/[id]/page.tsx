@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { apiFetch } from '@/lib/api-client';
 import { useToast } from '@/components/toast';
 import { ArrowLeft, RefreshCw, Copy, CheckCircle } from 'lucide-react';
+import { formatMoney } from '@/lib/currency';
 
 const DEFAULT_STATUS_STYLE = { pill: 'bg-amber-50 text-amber-700 border-amber-200', dot: 'bg-amber-500', label: 'Pending' };
 
@@ -84,8 +85,7 @@ export default function TransactionDetailPage() {
 
   const status = STATUS_STYLES[tx.status] ?? DEFAULT_STATUS_STYLE;
   const amount = typeof tx.amount === 'bigint' ? Number(tx.amount) : Number(tx.amount ?? 0);
-  const c = tx.currency || 'GHS';
-  const formatted = c === 'GHS' ? `GH₵ ${(amount / 100).toFixed(2)}` : `${c} ${(amount / 100).toFixed(2)}`;
+  const formatted = formatMoney(amount, tx.currency);
   const attempts = tx.attempts ?? tx.paymentAttempts ?? [];
   const currentStep = TIMELINE_STEPS.indexOf(tx.status);
 

@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { Plus, CreditCard, Copy, ExternalLink, CheckCircle, X, Globe, Eye } from 'lucide-react';
 import { apiFetch } from '@/lib/api-client';
 import { useToast } from '@/components/toast';
+import { formatMoney, getMerchantDefaultCurrency } from '@/lib/currency';
 
 const BASE_URL = typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3001';
 
@@ -53,8 +54,14 @@ export default function PaymentPages() {
 
   const loadPages = async () => {
     try {
-      const data = await apiFetch('/v1/payment-pages');
+      const [data, merchantRes]: [any, any] = await Promise.all([
+        apiFetch('/v1/payment-pages'),
+        apiFetch('/v1/merchants/me').catch(() => null),
+      ]);
       setPages((data as any)?.items || []);
+      if (merchantRes?.country) {
+        setForm(prev => ({ ...prev, currency: getMerchantDefaultCurrency(merchantRes.country) }));
+      }
     } catch (e: any) {
       toastError('Failed to load payment pages', e?.message);
     } finally {
@@ -146,7 +153,7 @@ export default function PaymentPages() {
                 <h3 className="font-bold text-slate-900 mb-1">{page.name || page.title}</h3>
                 {page.description && <p className="text-slate-400 text-xs mb-3 line-clamp-2">{page.description}</p>}
                 <div className="text-xl font-black text-slate-900 mb-4">
-                  {page.currency ?? 'GHS'} {page.amount ? (Number(page.amount) / 100).toFixed(2) : 'Open amount'}
+                  {page.amount ? formatMoney(page.amount, page.currency) : 'Open amount'}
                 </div>
 
                 {/* Shareable link */}
