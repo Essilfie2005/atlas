@@ -28,44 +28,44 @@ async function fetchWithAuth(endpoint: string, options: RequestInit = {}) {
 
 export const api = {
   auth: {
-    login: (email, password) => fetchWithAuth('/auth/login', { method: 'POST', body: JSON.stringify({ email, password }) }),
+    login: (email: string, password: string) => fetchWithAuth('/auth/login', { method: 'POST', body: JSON.stringify({ email, password }) }),
     keys: {
       list: () => fetchWithAuth('/auth/keys'),
-      create: (data) => fetchWithAuth('/auth/keys', { method: 'POST', body: JSON.stringify(data) }),
-      revoke: (id) => fetchWithAuth(`/auth/keys/${id}`, { method: 'DELETE' }),
+      create: (data: any) => fetchWithAuth('/auth/keys', { method: 'POST', body: JSON.stringify(data) }),
+      revoke: (id: string) => fetchWithAuth(`/auth/keys/${id}`, { method: 'DELETE' }),
     },
   },
   merchants: {
     me: () => fetchWithAuth('/merchants/me'),
-    update: (data) => fetchWithAuth('/merchants/me', { method: 'PATCH', body: JSON.stringify(data) }),
+    update: (data: any) => fetchWithAuth('/merchants/me', { method: 'PATCH', body: JSON.stringify(data) }),
   },
   payments: {
-    list: (params = {}) => {
+    list: (params: any = {}) => {
       const qs = new URLSearchParams(params).toString();
       return fetchWithAuth(`/payments${qs ? '?' + qs : ''}`);
     },
-    get: (id) => fetchWithAuth(`/payments/${id}`),
+    get: (id: string) => fetchWithAuth(`/payments/${id}`),
   },
   payouts: {
-    list: (params = {}) => {
+    list: (params: any = {}) => {
       const qs = new URLSearchParams(params).toString();
       return fetchWithAuth(`/payouts${qs ? '?' + qs : ''}`);
     },
-    create: (data) => fetchWithAuth('/payouts', { method: 'POST', body: JSON.stringify(data) }),
+    create: (data: any) => fetchWithAuth('/payouts', { method: 'POST', body: JSON.stringify(data) }),
   },
   beneficiaries: {
     list: () => fetchWithAuth('/beneficiaries'),
-    create: (data) => fetchWithAuth('/beneficiaries', { method: 'POST', body: JSON.stringify(data) }),
+    create: (data: any) => fetchWithAuth('/beneficiaries', { method: 'POST', body: JSON.stringify(data) }),
   },
   webhooks: {
-    events: (params = {}) => {
+    events: (params: any = {}) => {
       const qs = new URLSearchParams(params).toString();
       return fetchWithAuth(`/webhooks/events${qs ? '?' + qs : ''}`);
     },
-    retry: (id) => fetchWithAuth(`/webhooks/events/${id}/retry`, { method: 'POST' }),
+    retry: (id: string) => fetchWithAuth(`/webhooks/events/${id}/retry`, { method: 'POST' }),
   },
   settlements: {
-    list: (params = {}) => {
+    list: (params: any = {}) => {
       const qs = new URLSearchParams(params).toString();
       return fetchWithAuth(`/settlements${qs ? '?' + qs : ''}`);
     },

@@ -270,7 +270,7 @@ function GlobeMockup() {
             const px=(p.x/100)*W+4,py=(p.y/100)*H+4;
             return(<g key={i}><circle cx={px} cy={py} r={12} fill="white" fillOpacity={0.1}/><circle cx={px} cy={py} r={6} fill="white" fillOpacity={0.15}/><circle cx={px} cy={py} r={3.5} fill="white" stroke="white" strokeWidth="1"/></g>);
           })}
-          {[[38,52,44,49],[44,49,67,60],[44,49,55,84],[67,60,65,67]].map(([x1,y1,x2,y2],i)=>(
+          {([[38,52,44,49],[44,49,67,60],[44,49,55,84],[67,60,65,67]] as const).map(([x1,y1,x2,y2],i)=>(
             <line key={i} x1={(x1/100)*W+4} y1={(y1/100)*H+4} x2={(x2/100)*W+4} y2={(y2/100)*H+4} stroke="white" strokeWidth="1" strokeOpacity="0.3" strokeDasharray="3,3"/>
           ))}
         </svg>

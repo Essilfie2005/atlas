@@ -6,11 +6,13 @@ import { apiFetch } from '@/lib/api-client';
 import { useToast } from '@/components/toast';
 import { ArrowLeft, RefreshCw, Copy, CheckCircle } from 'lucide-react';
 
+const DEFAULT_STATUS_STYLE = { pill: 'bg-amber-50 text-amber-700 border-amber-200', dot: 'bg-amber-500', label: 'Pending' };
+
 const STATUS_STYLES: Record<string, { pill: string; dot: string; label: string }> = {
   SUCCEEDED: { pill: 'bg-emerald-50 text-emerald-700 border-emerald-200', dot: 'bg-emerald-500', label: 'Succeeded' },
   COMPLETED:  { pill: 'bg-emerald-50 text-emerald-700 border-emerald-200', dot: 'bg-emerald-500', label: 'Completed' },
   CREATED:   { pill: 'bg-blue-50 text-blue-700 border-blue-200',           dot: 'bg-blue-500',    label: 'Created' },
-  PENDING:   { pill: 'bg-amber-50 text-amber-700 border-amber-200',        dot: 'bg-amber-500',   label: 'Pending' },
+  PENDING:   DEFAULT_STATUS_STYLE,
   FAILED:    { pill: 'bg-red-50 text-red-700 border-red-200',              dot: 'bg-red-500',     label: 'Failed' },
   CANCELLED: { pill: 'bg-slate-100 text-slate-600 border-slate-200',       dot: 'bg-slate-400',   label: 'Cancelled' },
   REFUNDED:  { pill: 'bg-purple-50 text-purple-700 border-purple-200',     dot: 'bg-purple-500',  label: 'Refunded' },
@@ -80,7 +82,7 @@ export default function TransactionDetailPage() {
 
   if (!tx) return null;
 
-  const status = STATUS_STYLES[tx.status] ?? STATUS_STYLES['PENDING'];
+  const status = STATUS_STYLES[tx.status] ?? DEFAULT_STATUS_STYLE;
   const amount = typeof tx.amount === 'bigint' ? Number(tx.amount) : Number(tx.amount ?? 0);
   const formatted = new Intl.NumberFormat('en-GH', { style: 'currency', currency: tx.currency || 'GHS' }).format(amount / 100);
   const attempts = tx.attempts ?? tx.paymentAttempts ?? [];
@@ -157,7 +159,7 @@ export default function TransactionDetailPage() {
               <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-4">Payment Attempts ({attempts.length})</h2>
               <div className="space-y-3">
                 {attempts.map((a: any, i: number) => {
-                  const s = STATUS_STYLES[a.status] ?? STATUS_STYLES['PENDING'];
+                  const s = (a.status ? STATUS_STYLES[a.status] : null) ?? DEFAULT_STATUS_STYLE;
                   return (
                     <div key={i} className="flex items-center justify-between p-3 bg-slate-50 rounded-xl">
                       <div className="flex items-center gap-3">

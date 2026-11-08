@@ -27,22 +27,28 @@ export function Badge({ status }: { status: string }) {
   );
 }
 
-export function Button({ variant = 'primary', size = 'md', loading, children, className, ...props }: any) {
+interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+  variant?: 'primary' | 'secondary' | 'danger' | 'ghost';
+  size?: 'sm' | 'md' | 'lg';
+  loading?: boolean;
+}
+
+export function Button({ variant = 'primary', size = 'md', loading, children, className, ...props }: ButtonProps) {
   const base = "inline-flex items-center justify-center font-medium rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2";
-  const variants = {
+  const variants: Record<string, string> = {
     primary: "bg-brand text-white hover:bg-brand-dark focus:ring-brand",
     secondary: "bg-white text-gray-700 border border-gray-300 hover:bg-gray-50 focus:ring-brand",
     danger: "bg-[#FF4D4D] text-white hover:bg-red-600 focus:ring-red-500",
     ghost: "text-gray-600 hover:bg-gray-100 hover:text-gray-900 focus:ring-gray-500",
   };
-  const sizes = {
+  const sizes: Record<string, string> = {
     sm: "px-3 py-1.5 text-sm",
     md: "px-4 py-2 text-sm",
     lg: "px-6 py-3 text-base",
   };
 
   return (
-    <button className={cn(base, variants[variant], sizes[size], loading && "opacity-75 cursor-not-allowed", className)} disabled={loading} {...props}>
+    <button className={cn(base, variants[variant] || variants.primary, sizes[size] || sizes.md, loading && "opacity-75 cursor-not-allowed", className)} disabled={loading} {...props}>
       {loading && (
         <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-current" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
           <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>

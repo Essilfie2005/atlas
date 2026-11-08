@@ -1,6 +1,6 @@
-﻿'use client';
+'use client';
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { apiFetch } from '@/lib/api-client';
 import { RefreshCw, ChevronDown, ChevronUp, Webhook } from 'lucide-react';
 

@@ -21,8 +21,8 @@ export default function DevelopersPage() {
   const fetchApiKeys = async () => {
     setLoading(true);
     try {
-      const data = await apiFetch('/v1/auth/keys');
-      setApiKeys(data.data || []);
+      const data: any = await apiFetch('/v1/auth/keys');
+      setApiKeys(data?.data || []);
     } catch (error) {
       console.error('Failed to fetch API keys:', error);
     } finally {
@@ -33,8 +33,8 @@ export default function DevelopersPage() {
   const fetchWebhooks = async () => {
     setLoading(true);
     try {
-      const data = await apiFetch('/v1/webhooks/events');
-      setWebhooks(data.data || []);
+      const data: any = await apiFetch('/v1/webhooks/events');
+      setWebhooks(data?.data || []);
     } catch (error) {
       console.error('Failed to fetch webhooks:', error);
     } finally {

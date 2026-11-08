@@ -14,7 +14,7 @@ export default function DashboardPage() {
   useEffect(() => {
     async function loadData() {
       try {
-        const [merchantRes, recentTxRes, countRes] = await Promise.all([
+        const [merchantRes, recentTxRes, countRes]: [any, any, any] = await Promise.all([
           apiFetch('/v1/merchants/me').catch(() => null),
           apiFetch('/v1/payment-intents?take=5').catch(() => ({ data: [] })),
           apiFetch('/v1/payment-intents?take=1').catch(() => ({ total: 0 }))
