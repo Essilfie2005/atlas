@@ -121,10 +121,14 @@ export class PaymentIntentsService {
     });
 
     // Create attempt record
+    const targetProvider = dto.provider && dto.provider !== 'auto'
+      ? dto.provider
+      : this.providers.resolveProvider(intent.currency);
+
     const attempt = await this.prisma.paymentAttempt.create({
       data: {
         paymentIntentId: intentId,
-        provider: dto.provider,
+        provider: targetProvider,
         status: 'PENDING',
         providerPaymentMethod: (dto.providerPaymentMethod ?? {}) as Prisma.InputJsonValue,
       },
@@ -140,7 +144,7 @@ export class PaymentIntentsService {
     };
 
     try {
-      const adapter = this.providers.getAdapter(dto.provider);
+      const adapter = this.providers.getAdapter(targetProvider);
       providerResult = await adapter.charge({
         amount: intent.amount,
         currency: intent.currency,
@@ -199,7 +203,7 @@ export class PaymentIntentsService {
         : `Payment failed, reversing entry: ${intentId}`,
       transactionId: intentId,
       metadata: {
-        provider: dto.provider,
+        provider: targetProvider,
         attemptId: attempt.id,
         providerTransactionId: providerResult.providerTransactionId,
       },

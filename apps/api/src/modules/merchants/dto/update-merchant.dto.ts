@@ -1,4 +1,4 @@
-import { IsString, IsOptional, IsUrl, MaxLength } from 'class-validator';
+import { IsString, IsOptional, IsUrl, MaxLength, IsObject } from 'class-validator';
 import { ApiPropertyOptional } from '@nestjs/swagger';
 
 export class UpdateMerchantDto {
@@ -11,4 +11,8 @@ export class UpdateMerchantDto {
   @ApiPropertyOptional({ description: 'Webhook delivery URL for this merchant' })
   @IsOptional() @IsUrl()
   webhookUrl?: string;
+
+  @ApiPropertyOptional({ description: 'Custom merchant metadata including KYC' })
+  @IsOptional() @IsObject()
+  metadata?: Record<string, unknown>;
 }

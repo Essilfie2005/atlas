@@ -21,6 +21,7 @@ const MERCHANT_SELECT = {
   country: true,
   status: true,
   riskProfile: true,
+  metadata: true,
   createdAt: true,
   updatedAt: true,
 };
@@ -129,11 +130,83 @@ export class MerchantsService {
         ...(dto.legalName !== undefined && { legalName: dto.legalName }),
         ...(dto.website !== undefined && { website: dto.website }),
         ...(dto.webhookUrl !== undefined && { webhookUrl: dto.webhookUrl }),
+        ...(dto.metadata !== undefined && { metadata: dto.metadata as any }),
       },
       select: MERCHANT_SELECT,
     });
 
     this.logger.log(`Merchant updated: id=${merchantId}`);
     return updated;
+  }
+
+  async approveKyc(merchantId: string) {
+    const merchant = await this.findById(merchantId);
+    const meta = (merchant.metadata as any) ?? {};
+    const kyc = meta.kyc ?? {};
+
+    const updated = await this.prisma.merchant.update({
+      where: { id: merchantId },
+      data: {
+        status: 'ACTIVE',
+        metadata: {
+          ...meta,
+          kyc: {
+            ...kyc,
+            status: 'APPROVED',
+            approvedAt: new Date().toISOString(),
+          },
+        },
+      },
+      select: MERCHANT_SELECT,
+    });
+
+    // Check if merchant already has a LIVE API key; if not, create one!
+    const existingLiveKey = await this.prisma.apiKey.findFirst({
+      where: { merchantId, type: 'LIVE', status: 'ACTIVE' },
+    });
+
+    if (!existingLiveKey) {
+      const secret = randomBytes(32).toString('hex');
+      const rawKey = `sk_live_${secret}`;
+      const keyHash = createHash('sha256').update(rawKey).digest('hex');
+      const keyPrefix = rawKey.substring(0, 16);
+
+      await this.prisma.apiKey.create({
+        data: {
+          merchantId,
+          name: 'Default Live Key',
+          type: 'LIVE',
+          keyHash,
+          keyPrefix,
+          scopes: [],
+          status: 'ACTIVE',
+        },
+      });
+      this.logger.log(`Live API key provisioned for verified merchant: id=${merchantId}`);
+    }
+
+    return updated;
+  }
+
+  async rejectKyc(merchantId: string, reason?: string) {
+    const merchant = await this.findById(merchantId);
+    const meta = (merchant.metadata as any) ?? {};
+    const kyc = meta.kyc ?? {};
+
+    return this.prisma.merchant.update({
+      where: { id: merchantId },
+      data: {
+        metadata: {
+          ...meta,
+          kyc: {
+            ...kyc,
+            status: 'REJECTED',
+            rejectionReason: reason ?? 'Incomplete business documents',
+            rejectedAt: new Date().toISOString(),
+          },
+        },
+      },
+      select: MERCHANT_SELECT,
+    });
   }
 }

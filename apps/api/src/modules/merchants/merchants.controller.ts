@@ -40,4 +40,23 @@ export class MerchantsController {
   ) {
     return this.merchantsService.update(merchant.id, dto);
   }
+
+  @Post('me/kyc/approve')
+  @UseGuards(ApiKeyGuard)
+  @ApiBearerAuth('api-key')
+  @ApiOperation({ summary: 'Approve merchant KYC verification and unlock Live Mode' })
+  async approveMyKyc(@CurrentMerchant() merchant: { id: string }) {
+    return this.merchantsService.approveKyc(merchant.id);
+  }
+
+  @Post('me/kyc/reject')
+  @UseGuards(ApiKeyGuard)
+  @ApiBearerAuth('api-key')
+  @ApiOperation({ summary: 'Reject merchant KYC verification' })
+  async rejectMyKyc(
+    @CurrentMerchant() merchant: { id: string },
+    @Body() body: { reason?: string },
+  ) {
+    return this.merchantsService.rejectKyc(merchant.id, body?.reason);
+  }
 }
