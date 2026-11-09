@@ -22,12 +22,12 @@ class WebhookTestDto {
 
 @ApiTags('webhooks')
 @Controller('webhooks')
-@UseGuards(ApiKeyGuard)
-@ApiBearerAuth('api-key')
 export class WebhooksController {
   constructor(private readonly service: WebhooksService) {}
 
   @Post('test')
+  @UseGuards(ApiKeyGuard)
+  @ApiBearerAuth('api-key')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Send a test webhook event to configured URL' })
   async test(
@@ -43,6 +43,8 @@ export class WebhooksController {
   }
 
   @Get('events')
+  @UseGuards(ApiKeyGuard)
+  @ApiBearerAuth('api-key')
   @ApiOperation({ summary: 'List webhook events with delivery status' })
   async listEvents(
     @CurrentMerchant() merchant: { id: string },
@@ -53,6 +55,8 @@ export class WebhooksController {
   }
 
   @Get('events/:id')
+  @UseGuards(ApiKeyGuard)
+  @ApiBearerAuth('api-key')
   @ApiOperation({ summary: 'Get webhook event with all delivery attempts' })
   async findEvent(
     @CurrentMerchant() merchant: { id: string },
@@ -62,6 +66,8 @@ export class WebhooksController {
   }
 
   @Post('events/:id/retry')
+  @UseGuards(ApiKeyGuard)
+  @ApiBearerAuth('api-key')
   @ApiOperation({ summary: 'Manually retry a failed webhook event' })
   async retryEvent(
     @CurrentMerchant() merchant: { id: string },
@@ -71,6 +77,7 @@ export class WebhooksController {
   }
 
   // ── Inbound: Paystack → ATLAS ───────────────────────────────────────
+  // Note: Authenticated exclusively via HMAC-SHA512 (x-paystack-signature), NOT ApiKeyGuard!
   @Post('inbound/paystack')
   @HttpCode(HttpStatus.OK)
   @ApiExcludeEndpoint()

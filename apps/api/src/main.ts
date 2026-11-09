@@ -60,6 +60,7 @@ async function bootstrap() {
       'Authorization',
       'x-request-id',
       'x-idempotency-key',
+      'x-atlas-public-key',
     ],
     credentials: true,
   });
