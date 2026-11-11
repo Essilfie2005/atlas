@@ -54,6 +54,8 @@
 
       const checkoutUrl = `${this.host}/pay/inline?${params.toString()}`;
 
+      const isMobile = typeof window !== 'undefined' && (window.innerWidth <= 640 || /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent));
+
       // Create overlay
       const overlay = document.createElement('div');
       overlay.id = 'atlas-checkout-overlay';
@@ -63,16 +65,16 @@
         left: 0;
         width: 100vw;
         height: 100vh;
-        background: rgba(11, 31, 58, 0.7);
+        background: rgba(11, 31, 58, ${isMobile ? '0.85' : '0.7'});
         backdrop-filter: blur(8px);
         -webkit-backdrop-filter: blur(8px);
         display: flex;
-        align-items: center;
+        align-items: ${isMobile ? 'flex-end' : 'center'};
         justify-content: center;
         z-index: 2147483647;
         opacity: 0;
         transition: opacity 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-        padding: 16px;
+        padding: ${isMobile ? '0' : '16px'};
         box-sizing: border-box;
       `;
 
@@ -80,15 +82,15 @@
       frameWrapper.style.cssText = `
         position: relative;
         width: 100%;
-        max-width: 440px;
-        height: 640px;
-        max-height: 94vh;
+        max-width: ${isMobile ? '100%' : '440px'};
+        height: ${isMobile ? '92vh' : '640px'};
+        max-height: ${isMobile ? '92vh' : '94vh'};
         background: #ffffff;
-        border-radius: 24px;
+        border-radius: ${isMobile ? '24px 24px 0 0' : '24px'};
         box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.1);
         overflow: hidden;
-        transform: scale(0.95) translateY(12px);
-        transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        transform: ${isMobile ? 'translateY(100%)' : 'scale(0.95) translateY(12px)'};
+        transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
         display: flex;
         flex-direction: column;
       `;
@@ -143,7 +145,7 @@
 
       requestAnimationFrame(() => {
         overlay.style.opacity = '1';
-        frameWrapper.style.transform = 'scale(1) translateY(0)';
+        frameWrapper.style.transform = isMobile ? 'translateY(0)' : 'scale(1) translateY(0)';
       });
 
       this._boundMessageHandler = (e) => {

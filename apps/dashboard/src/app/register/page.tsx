@@ -86,7 +86,7 @@ export default function RegisterPage() {
           <p className="text-[#7A9CC0] text-sm">Pan-African Payment Infrastructure</p>
         </div>
 
-        <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-8">
+        <div className="bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-5 sm:p-8">
           <h1 className="text-xl font-semibold text-white mb-1">Create your account</h1>
           <p className="text-[#7A9CC0] text-sm mb-6">Start accepting payments across Africa</p>
 
@@ -97,7 +97,7 @@ export default function RegisterPage() {
                 value={form.legalName}
                 onChange={(e) => setForm({ ...form, legalName: e.target.value })}
                 placeholder="Delivery Ltd"
-                className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/30 text-sm focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand"
+                className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/30 text-base sm:text-sm focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand"
                 required
               />
             </div>
@@ -108,7 +108,7 @@ export default function RegisterPage() {
                 value={form.email}
                 onChange={(e) => setForm({ ...form, email: e.target.value })}
                 placeholder="hello@yourbusiness.com"
-                className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/30 text-sm focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand"
+                className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/30 text-base sm:text-sm focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand"
                 required
               />
             </div>
@@ -120,7 +120,7 @@ export default function RegisterPage() {
                   value={form.password}
                   onChange={(e) => setForm({ ...form, password: e.target.value })}
                   placeholder="Min. 8 chars"
-                  className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/30 text-sm focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand"
+                  className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/30 text-base sm:text-sm focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand"
                   required minLength={8}
                 />
               </div>
@@ -131,7 +131,7 @@ export default function RegisterPage() {
                   value={form.confirmPassword}
                   onChange={(e) => setForm({ ...form, confirmPassword: e.target.value })}
                   placeholder="Repeat"
-                  className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/30 text-sm focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand"
+                  className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/30 text-base sm:text-sm focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand"
                   required
                 />
               </div>
@@ -168,7 +168,7 @@ export default function RegisterPage() {
                 value={form.website}
                 onChange={(e) => setForm({ ...form, website: e.target.value })}
                 placeholder="https://yourbusiness.com"
-                className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/30 text-sm focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand"
+                className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/30 text-base sm:text-sm focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand"
               />
             </div>
 

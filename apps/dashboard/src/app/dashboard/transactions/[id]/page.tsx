@@ -100,12 +100,12 @@ export default function TransactionDetailPage() {
         <Link href="/dashboard/transactions" className="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-slate-800 transition-colors mb-4">
           <ArrowLeft className="w-4 h-4" /> Back to Transactions
         </Link>
-        <div className="flex items-start justify-between gap-4">
+        <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 sm:gap-4">
           <div>
             <h1 className="text-2xl font-bold text-slate-900">{formatted}</h1>
-            <p className="text-slate-400 text-sm mt-1 font-mono">{tx.id}</p>
+            <p className="text-slate-400 text-xs sm:text-sm mt-1 font-mono break-all">{tx.id}</p>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-2 sm:gap-3">
             <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border ${status.pill}`}>
               <span className={`w-1.5 h-1.5 rounded-full ${status.dot}`} />
               {status.label}
@@ -124,7 +124,7 @@ export default function TransactionDetailPage() {
         {/* Left — details */}
         <div className="lg:col-span-2 space-y-5">
           {/* Summary card */}
-          <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6">
+          <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-4 sm:p-6">
             <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-4">Payment Details</h2>
             <dl className="space-y-3">
               {[
@@ -139,7 +139,7 @@ export default function TransactionDetailPage() {
                 ['Created',     tx.createdAt ? new Date(tx.createdAt).toLocaleString() : '—'],
                 ['Updated',     tx.updatedAt ? new Date(tx.updatedAt).toLocaleString() : '—'],
               ].map(([k, v]) => (
-                <div key={k} className="flex justify-between text-sm">
+                <div key={k} className="flex justify-between items-center text-xs sm:text-sm gap-2">
                   <dt className="text-slate-400 font-medium">{k}</dt>
                   <dd className="text-slate-900 font-medium text-right flex items-center">
                     {v}

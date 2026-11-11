@@ -142,7 +142,7 @@ function InlineCheckoutContent() {
       </div>
 
       {/* Main Body */}
-      <div className="flex-1 overflow-y-auto px-6 py-5 flex flex-col justify-between">
+      <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-4 sm:py-5 flex flex-col justify-between overscroll-contain">
         {stage === 'form' && (
           <div className="space-y-5">
             {/* Amount Banner */}
@@ -209,7 +209,7 @@ function InlineCheckoutContent() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="name@example.com"
-                  className="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-600/30 focus:border-blue-600 transition"
+                  className="w-full px-3.5 py-3 border border-slate-200 rounded-xl text-base sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-600/30 focus:border-blue-600 transition"
                 />
               </div>
 

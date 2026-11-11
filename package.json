@@ -18,6 +18,9 @@
   },
   "devDependencies": {
     "@types/node": "^22.0.0",
+    "adm-zip": "^0.6.1",
+    "pdfkit": "^0.20.2",
+    "pptxgenjs": "^4.0.1",
     "prettier": "^3.3.3",
     "rimraf": "^6.0.1",
     "turbo": "^2.1.3",

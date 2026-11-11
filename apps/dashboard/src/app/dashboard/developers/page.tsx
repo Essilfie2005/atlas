@@ -155,7 +155,7 @@ curl -X POST https://atlas-vrv3.onrender.com/v1/payment-intents \\
   };
 
   return (
-    <div className="p-6 max-w-6xl mx-auto space-y-6">
+    <div className="space-y-4 sm:space-y-6 max-w-6xl mx-auto">
       {/* Load atlas.js for live testing */}
       <Script src="/atlas.js" strategy="lazyOnload" />
 
@@ -167,7 +167,7 @@ curl -X POST https://atlas-vrv3.onrender.com/v1/payment-intents \\
             Integrate Pan-African payment rails into your websites, mobile apps, and backend services.
           </p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3">
           <a
             href="https://atlas-vrv3.onrender.com/docs"
             target="_blank"
@@ -189,7 +189,7 @@ curl -X POST https://atlas-vrv3.onrender.com/v1/payment-intents \\
       </div>
 
       {/* Navigation Tabs */}
-      <div className="flex gap-2 border-b border-slate-200">
+      <div className="flex gap-1 sm:gap-2 border-b border-slate-200 overflow-x-auto no-scrollbar whitespace-nowrap -mx-1 px-1 sm:mx-0 sm:px-0">
         <button
           onClick={() => setActiveTab('quickstart')}
           className={`flex items-center gap-2 py-3 px-4 border-b-2 font-medium text-sm transition-all ${
@@ -243,7 +243,7 @@ curl -X POST https://atlas-vrv3.onrender.com/v1/payment-intents \\
       {activeTab === 'quickstart' && (
         <div className="space-y-6">
           {/* Hero Banner */}
-          <div className="bg-gradient-to-r from-slate-900 to-indigo-950 rounded-2xl p-6 text-white shadow-xl relative overflow-hidden">
+          <div className="bg-gradient-to-r from-slate-900 to-indigo-950 rounded-2xl p-4 sm:p-6 text-white shadow-xl relative overflow-hidden">
             <div className="relative z-10 max-w-2xl">
               <span className="px-2.5 py-1 rounded-full bg-blue-500/20 text-blue-300 text-[11px] font-bold uppercase tracking-wider border border-blue-400/30">
                 Client SDK v1.0 Released
@@ -272,7 +272,7 @@ curl -X POST https://atlas-vrv3.onrender.com/v1/payment-intents \\
 
           {/* Code Viewer */}
           <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
-            <div className="px-6 py-3.5 border-b border-slate-100 flex items-center justify-between bg-slate-50/70">
+            <div className="px-3.5 sm:px-6 py-3 border-b border-slate-100 flex flex-wrap items-center justify-between gap-2 bg-slate-50/70">
               <div className="flex items-center gap-2">
                 {(['html', 'nodejs', 'python', 'curl'] as const).map((lang) => (
                   <button
@@ -307,7 +307,7 @@ curl -X POST https://atlas-vrv3.onrender.com/v1/payment-intents \\
               </button>
             </div>
 
-            <div className="p-4 bg-slate-950 text-slate-100 overflow-x-auto">
+            <div className="p-3 sm:p-4 bg-slate-950 text-slate-100 overflow-x-auto max-w-full">
               <pre className="font-mono text-xs leading-relaxed">
                 <code>{codeSnippets[selectedLang]}</code>
               </pre>
@@ -318,7 +318,7 @@ curl -X POST https://atlas-vrv3.onrender.com/v1/payment-intents \\
 
       {/* Tab 2: API Key Pairs */}
       {activeTab === 'keys' && (
-        <div className="bg-white rounded-2xl border border-slate-200 p-6 space-y-6 shadow-sm">
+        <div className="bg-white rounded-2xl border border-slate-200 p-4 sm:p-6 space-y-4 sm:space-y-6 shadow-sm">
           <div>
             <h2 className="text-lg font-bold text-slate-900">Your Active API Key Pair</h2>
             <p className="text-xs text-slate-500 mt-0.5">

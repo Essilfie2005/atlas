@@ -174,19 +174,19 @@ export default function PayPage() {
           <div>
             <label className="block text-xs font-semibold text-slate-600 mb-1.5 uppercase tracking-wide">Full Name *</label>
             <input value={name} onChange={e => setName(e.target.value)} placeholder="Jane Doe"
-              className="w-full px-4 py-3 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-400 transition-colors" />
+              className="w-full px-4 py-3 border border-slate-200 rounded-xl text-base sm:text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-400 transition-colors" />
           </div>
 
           <div>
             <label className="block text-xs font-semibold text-slate-600 mb-1.5 uppercase tracking-wide">Email Address *</label>
             <input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="you@example.com"
-              className="w-full px-4 py-3 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-400 transition-colors" />
+              className="w-full px-4 py-3 border border-slate-200 rounded-xl text-base sm:text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-400 transition-colors" />
           </div>
 
           <div>
             <label className="block text-xs font-semibold text-slate-600 mb-1.5 uppercase tracking-wide">Phone <span className="normal-case font-normal text-slate-400">(optional)</span></label>
             <input type="tel" value={phone} onChange={e => setPhone(e.target.value)} placeholder="+233 24 000 0000"
-              className="w-full px-4 py-3 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-400 transition-colors" />
+              className="w-full px-4 py-3 border border-slate-200 rounded-xl text-base sm:text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-400 transition-colors" />
           </div>
 
           <button onClick={() => setStep('payment')} disabled={!canContinue}
@@ -260,7 +260,7 @@ export default function PayPage() {
               <div>
                 <label className="block text-xs font-semibold text-slate-600 mb-1.5 uppercase tracking-wide">Name on Card</label>
                 <input value={cardName} onChange={e => setCardName(e.target.value)} placeholder="As printed on card"
-                  className="w-full px-4 py-3 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-400 transition-colors" />
+                  className="w-full px-4 py-3 border border-slate-200 rounded-xl text-base sm:text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-400 transition-colors" />
               </div>
             </div>
           )}
@@ -318,7 +318,7 @@ export default function PayPage() {
 // ── Shell ────────────────────────────────────────────────────────────────
 function Shell({ children, pageData }: { children: React.ReactNode; pageData: PageData | null }) {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-100 via-indigo-50/40 to-purple-50/30 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-slate-100 via-indigo-50/40 to-purple-50/30 flex items-center justify-center p-3 sm:p-4 py-6 sm:py-12">
       <div className="w-full max-w-md">
         {pageData && (
           <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-white/60 shadow-sm p-4 mb-3 flex items-center gap-4">
@@ -332,7 +332,7 @@ function Shell({ children, pageData }: { children: React.ReactNode; pageData: Pa
             </div>
           </div>
         )}
-        <div className="bg-white rounded-2xl border border-slate-100 shadow-2xl shadow-slate-200/50 p-6">
+        <div className="bg-white rounded-2xl border border-slate-100 shadow-2xl shadow-slate-200/50 p-4 sm:p-6">
           {children}
         </div>
         <div className="flex items-center justify-center gap-1.5 mt-4">

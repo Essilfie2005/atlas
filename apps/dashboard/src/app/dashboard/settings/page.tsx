@@ -194,7 +194,7 @@ export default function SettingsPage() {
       )}
 
       {/* Tab navigation */}
-      <div className="flex gap-1 bg-white border border-border rounded-xl p-1 w-fit shadow-card">
+      <div className="flex gap-1 bg-white border border-border rounded-xl p-1 overflow-x-auto max-w-full no-scrollbar shadow-card whitespace-nowrap">
         {tabs.map(tab => (
           <button key={tab.id} onClick={() => setActiveTab(tab.id)}
             className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
@@ -212,7 +212,7 @@ export default function SettingsPage() {
         <div className="space-y-6">
           {/* Test Keys section */}
           <div className="bg-white rounded-2xl border border-border shadow-card overflow-hidden">
-            <div className="px-6 py-4 border-b border-border flex items-center justify-between">
+            <div className="px-4 sm:px-6 py-4 border-b border-border flex flex-wrap items-center justify-between gap-3">
               <div>
                 <h2 className="font-semibold text-[#0B1F3A]">Test API Keys</h2>
                 <p className="text-xs text-muted mt-0.5">Use these in your development environment. No real money moves.</p>
@@ -226,7 +226,7 @@ export default function SettingsPage() {
 
             {/* Create key inline form */}
             {showCreate && (
-              <div className="px-6 py-4 bg-brand/5 border-b border-border flex items-center gap-3">
+              <div className="px-4 sm:px-6 py-4 bg-brand/5 border-b border-border flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
                 <input value={newKeyName} onChange={e => setNewKeyName(e.target.value)}
                   placeholder="Key name (e.g. Development, Staging…)"
                   className="flex-1 px-4 py-2 border border-border rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand"
@@ -269,7 +269,7 @@ export default function SettingsPage() {
             ) : (
               <div className="divide-y divide-border">
                 {keys.filter(k => k.type === 'TEST' && k.status === 'ACTIVE').map(key => (
-                  <div key={key.id} className="px-6 py-5 hover:bg-page-bg/40 transition-colors">
+                  <div key={key.id} className="px-4 sm:px-6 py-4 sm:py-5 hover:bg-page-bg/40 transition-colors">
                     <div className="flex items-start justify-between gap-4 mb-3">
                       <div className="flex items-center gap-3">
                         <div className="w-9 h-9 bg-brand/10 rounded-lg flex items-center justify-center shrink-0">
@@ -289,7 +289,7 @@ export default function SettingsPage() {
                       </button>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pl-12">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pl-0 sm:pl-12">
                       {/* Public Key */}
                       <div className="bg-slate-50 border border-slate-200/80 rounded-xl p-3 flex flex-col justify-between gap-1.5">
                         <div className="flex items-center justify-between">
