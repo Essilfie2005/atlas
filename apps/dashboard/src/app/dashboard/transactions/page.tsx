@@ -178,7 +178,7 @@ export default function TransactionsPage() {
             <table className="w-full text-sm">
               <thead className="bg-slate-50 border-b border-slate-100">
                 <tr>
-                  {['Amount', 'Status', 'Customer', 'Description', 'Date', ''].map(h => (
+                  {['Gross Amount', 'Fee (1.5%)', 'Net', 'Status', 'Customer', 'Date', ''].map(h => (
                     <th key={h} className="px-6 py-3 text-left text-xs font-semibold text-slate-400 uppercase tracking-wider">{h}</th>
                   ))}
                 </tr>
@@ -193,13 +193,19 @@ export default function TransactionsPage() {
                     <td className="px-6 py-4 font-semibold text-slate-900">
                       {formatMoney(tx.amount, tx.currency)}
                     </td>
+                    <td className="px-6 py-4 text-xs font-mono text-slate-400">
+                      -{formatMoney(tx.fee ?? Math.round(Number(tx.amount || 0) * 0.015), tx.currency)}
+                    </td>
+                    <td className="px-6 py-4 font-semibold text-emerald-600">
+                      {formatMoney(tx.net ?? (Number(tx.amount || 0) - Math.round(Number(tx.amount || 0) * 0.015)), tx.currency)}
+                    </td>
                     <td className="px-6 py-4">
-                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold ${STATUS_STYLES[tx.status] ?? 'bg-slate-100 text-slate-500'}`}>
+                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold ${STATUS_STYLES[tx.status] ?? 'bg-slate-100 text-slate-500'}`}
+                      >
                         {tx.status?.charAt(0) + (tx.status?.slice(1).toLowerCase() ?? '')}
                       </span>
                     </td>
                     <td className="px-6 py-4 text-slate-600">{tx.customerEmail || <span className="text-slate-300">—</span>}</td>
-                    <td className="px-6 py-4 text-slate-500 max-w-[200px] truncate">{tx.description || <span className="text-slate-300">—</span>}</td>
                     <td className="px-6 py-4 text-slate-400 text-xs whitespace-nowrap">
                       {tx.createdAt ? new Date(tx.createdAt).toLocaleString() : '—'}
                     </td>

@@ -180,18 +180,32 @@ export class PaymentIntentsService {
       },
     });
 
+    // Calculate 1.5% ATLAS Platform Fee
+    const FEE_RATE = 0.015;
+    const feeAmount = BigInt(Math.round(Number(intent.amount) * FEE_RATE));
+    const netAmount = intent.amount - feeAmount;
+
+    // Update metadata with fee breakdown
+    const existingMeta = (intent.metadata as Record<string, unknown>) ?? {};
+    const updatedMeta = {
+      ...existingMeta,
+      fee: Number(feeAmount),
+      netAmount: Number(netAmount),
+      feeRate: FEE_RATE,
+    };
+
     // Update intent
     const updatedIntent = await this.prisma.paymentIntent.update({
       where: { id: intentId },
       data: {
         status: finalStatus,
         providerTransactionId: providerResult.providerTransactionId ?? null,
+        metadata: updatedMeta as Prisma.InputJsonValue,
         ...(finalStatus === PaymentIntentStatus.SUCCEEDED ? { succeededAt: new Date() } : { failedAt: new Date() }),
       },
     });
 
-
-    // Write final ledger entry
+    // Write final ledger entry (Gross credit)
     await this.ledger.writeEntry({
       merchantId,
       type: 'CREDIT',
@@ -199,7 +213,7 @@ export class PaymentIntentsService {
       currency: intent.currency,
       status: providerResult.success ? 'SETTLED' : 'REVERSED',
       description: providerResult.success
-        ? `Payment settled: ${intentId}`
+        ? `Payment settled (Gross): ${intentId}`
         : `Payment failed, reversing entry: ${intentId}`,
       transactionId: intentId,
       metadata: {
@@ -208,6 +222,24 @@ export class PaymentIntentsService {
         providerTransactionId: providerResult.providerTransactionId,
       },
     });
+
+    // Write fee deduction entry (ATLAS platform fee)
+    if (providerResult.success && feeAmount > BigInt(0)) {
+      await this.ledger.writeEntry({
+        merchantId,
+        type: 'DEBIT',
+        amount: feeAmount,
+        currency: intent.currency,
+        status: 'SETTLED',
+        description: `ATLAS platform fee (1.5%): ${intentId}`,
+        transactionId: intentId,
+        metadata: {
+          feeRate: FEE_RATE,
+          grossAmount: Number(intent.amount),
+          netAmount: Number(netAmount),
+        },
+      });
+    }
 
     const response = this.serialize(updatedIntent);
 
@@ -312,9 +344,15 @@ export class PaymentIntentsService {
   private serialize(intent: any): Record<string, unknown> {
     const meta = (intent.metadata ?? {}) as Record<string, any>;
     const customerEmail = intent.customer?.email || meta.customerEmail || null;
+    const amount = Number(intent.amount);
+    const fee = meta.fee !== undefined ? Number(meta.fee) : Math.round(amount * 0.015);
+    const net = meta.netAmount !== undefined ? Number(meta.netAmount) : amount - fee;
+
     return {
       ...intent,
-      amount: Number(intent.amount),
+      amount,
+      fee,
+      net,
       customerEmail,
     };
   }

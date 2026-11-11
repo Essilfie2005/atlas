@@ -85,7 +85,11 @@ export default function TransactionDetailPage() {
 
   const status = STATUS_STYLES[tx.status] ?? DEFAULT_STATUS_STYLE;
   const amount = typeof tx.amount === 'bigint' ? Number(tx.amount) : Number(tx.amount ?? 0);
+  const fee = tx.fee !== undefined ? Number(tx.fee) : Math.round(amount * 0.015);
+  const net = tx.net !== undefined ? Number(tx.net) : amount - fee;
   const formatted = formatMoney(amount, tx.currency);
+  const formattedFee = formatMoney(fee, tx.currency);
+  const formattedNet = formatMoney(net, tx.currency);
   const attempts = tx.attempts ?? tx.paymentAttempts ?? [];
   const currentStep = TIMELINE_STEPS.indexOf(tx.status);
 
@@ -124,7 +128,9 @@ export default function TransactionDetailPage() {
             <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-4">Payment Details</h2>
             <dl className="space-y-3">
               {[
-                ['Amount',      formatted],
+                ['Gross Amount', formatted],
+                ['Processing Fee (1.5%)', formattedFee],
+                ['Net Payout', formattedNet],
                 ['Currency',    tx.currency ?? 'GHS'],
                 ['Description', tx.description || '—'],
                 ['Customer',    tx.customerEmail || tx.customer?.email || '—'],

@@ -160,6 +160,19 @@ export class PayoutsService {
           providerTransactionId: providerResult.providerTransactionId,
         },
       });
+
+      // Flat withdrawal fee: GHS 1.00 (100 pesewas)
+      const PAYOUT_FEE_MINOR = BigInt(100);
+      await this.ledger.writeEntry({
+        merchantId,
+        type: 'DEBIT',
+        amount: PAYOUT_FEE_MINOR,
+        currency,
+        status: 'SETTLED',
+        description: `ATLAS withdrawal fee: ${payout.id}`,
+        payoutId: payout.id,
+        metadata: { fee: 100, payoutAmount: Number(amountMinor) },
+      });
     }
 
     const response = this.serialize(updated);
