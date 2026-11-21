@@ -1,7 +1,9 @@
 'use client';
+
 import React, { useEffect, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { Sidebar } from '@/components/sidebar';
+import { MobileNav } from '@/components/mobile-nav';
 import { ToastProvider } from '@/components/toast';
 import { ModeProvider, ModeBadge } from '@/components/mode-toggle';
 import { NotificationBell } from '@/components/notification-bell';
@@ -18,12 +20,14 @@ const breadcrumbMap: Record<string, string> = {
   payouts: 'Payouts',
   beneficiaries: 'Beneficiaries',
   'payment-pages': 'Payment Pages',
-  recurring: 'Recurring',
+  recurring: 'Recurring Plans',
   'split-payments': 'Split Payments',
   settlements: 'Settlements',
   'audit-logs': 'Audit Logs',
-  developers: 'Developers',
+  developers: 'Developer Hub',
   settings: 'Settings',
+  team: 'Team Members',
+  'go-live': 'Go Live Verification',
 };
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
@@ -36,12 +40,17 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   useEffect(() => {
     setMounted(true);
     const token = sessionStorage.getItem('atlas_token');
-    if (!token) { router.push('/login'); return; }
-    setMerchantName(sessionStorage.getItem('atlas_merchant_name') ?? '');
+    if (!token) {
+      router.push('/login');
+      return;
+    }
+    setMerchantName(sessionStorage.getItem('atlas_merchant_name') ?? 'Your Business');
   }, [router]);
 
-  // Close sidebar on route change (mobile)
-  useEffect(() => { setSidebarOpen(false); }, [pathname]);
+  // Auto-close sidebar drawer on route change
+  useEffect(() => {
+    setSidebarOpen(false);
+  }, [pathname]);
 
   if (!mounted) return null;
 
@@ -52,86 +61,90 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   return (
     <ModeProvider>
-    <ThemeProvider>
-    <ToastProvider>
-      <div className="flex h-[100dvh] bg-[#F0F6FF] dark:bg-slate-950 overflow-hidden">
-        <CommandCenter />
+      <ThemeProvider>
+        <ToastProvider>
+          <div className="flex h-[100dvh] bg-slate-50 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 overflow-hidden font-sans">
+            <CommandCenter />
 
-        {/* Mobile overlay */}
-        {sidebarOpen && (
-          <div
-            className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-40 lg:hidden transition-opacity"
-            onClick={() => setSidebarOpen(false)}
-          />
-        )}
+            {/* Desktop Sidebar (Fixed left, width 240px) */}
+            <div className="hidden lg:block fixed top-0 left-0 h-[100dvh] z-30">
+              <Sidebar />
+            </div>
 
-        {/* Sidebar — hidden on mobile unless open */}
-        <div className={`fixed top-0 left-0 h-[100dvh] z-50 transition-transform duration-300 ease-in-out ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0`}>
-          <Sidebar onClose={() => setSidebarOpen(false)} />
-        </div>
-
-        {/* Main area */}
-        <div className="flex-1 lg:ml-[240px] flex flex-col h-[100dvh] overflow-hidden">
-
-          {/* Top header bar */}
-          <header className="h-14 flex items-center justify-between px-3 sm:px-6 md:px-8 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-b border-border dark:border-slate-800 sticky top-0 z-30 flex-shrink-0">
-            <div className="flex items-center gap-2 sm:gap-3 min-w-0">
-              {/* Mobile hamburger */}
-              <button
-                className="lg:hidden w-10 h-10 flex items-center justify-center rounded-xl text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors active:scale-95 flex-shrink-0"
-                onClick={() => setSidebarOpen(true)}
-                aria-label="Open navigation menu"
-              >
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
-                </svg>
-              </button>
-
-              {/* Breadcrumbs */}
-              <div className="flex items-center gap-1.5 sm:gap-2 text-sm min-w-0 truncate">
-                <Link href="/dashboard" className="text-muted hover:text-[#0B1F3A] transition-colors hidden sm:block font-medium">ATLAS</Link>
-                {!isOverview && (
-                  <>
-                    <svg className="w-3.5 h-3.5 text-muted/50 hidden sm:block flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            {/* Main Content Workspace */}
+            <div className="flex-1 lg:ml-[240px] flex flex-col h-[100dvh] overflow-hidden">
+              
+              {/* Header Bar */}
+              <header className="h-14 sm:h-16 flex items-center justify-between px-4 sm:px-8 bg-white/80 dark:bg-zinc-950/80 backdrop-blur-md border-b border-zinc-200/80 dark:border-zinc-800/80 sticky top-0 z-20 flex-shrink-0">
+                <div className="flex items-center gap-3 min-w-0">
+                  {/* Brand mark on mobile */}
+                  <div className="lg:hidden w-8 h-8 rounded-lg bg-brand flex items-center justify-center text-white flex-shrink-0 shadow-sm">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
                     </svg>
-                    <span className="font-semibold text-slate-900 dark:text-white truncate text-sm sm:text-base">{pageTitle}</span>
-                  </>
-                )}
-                {isOverview && <span className="font-semibold text-slate-900 dark:text-white sm:hidden text-sm">Overview</span>}
-              </div>
+                  </div>
+
+                  {/* Breadcrumb / Page Title */}
+                  <div className="flex items-center gap-2 text-sm min-w-0">
+                    <Link 
+                      href="/dashboard" 
+                      className="text-zinc-400 hover:text-zinc-700 dark:text-zinc-500 dark:hover:text-zinc-300 transition-colors hidden sm:inline font-medium"
+                    >
+                      ATLAS
+                    </Link>
+                    {!isOverview && (
+                      <span className="text-zinc-300 dark:text-zinc-700 hidden sm:inline">/</span>
+                    )}
+                    <h1 className="font-semibold text-zinc-900 dark:text-white truncate text-base sm:text-base">
+                      {isOverview ? 'Overview' : pageTitle}
+                    </h1>
+                  </div>
+                </div>
+
+                {/* Right utility items */}
+                <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
+                  {/* Search hotkey hint (Desktop) */}
+                  <button
+                    onClick={() => window.dispatchEvent(new CustomEvent('open-command-center'))}
+                    className="hidden md:flex items-center gap-2 px-2.5 py-1.5 rounded-lg border border-zinc-200 dark:border-zinc-800 text-xs text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-colors"
+                  >
+                    <span>Search</span>
+                    <kbd className="px-1 py-0.5 text-[10px] font-mono bg-zinc-100 dark:bg-zinc-800 rounded border border-zinc-200 dark:border-zinc-700">⌘K</kbd>
+                  </button>
+
+                  {/* Mode Badge (Test vs Live) */}
+                  <ModeBadge />
+
+                  {/* Notifications */}
+                  <NotificationBell />
+
+                  {/* Theme Switcher */}
+                  <ThemeToggle />
+
+                  {/* Merchant Avatar */}
+                  <div 
+                    title={merchantName}
+                    className="w-8 h-8 rounded-full bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 flex items-center justify-center text-xs font-semibold shadow-sm flex-shrink-0"
+                  >
+                    {merchantName.charAt(0).toUpperCase() || 'A'}
+                  </div>
+                </div>
+              </header>
+
+              {/* Scrollable Page Canvas */}
+              <main className="flex-1 overflow-y-auto px-4 sm:px-8 py-5 sm:py-8 overscroll-contain pb-28 lg:pb-10">
+                <div className="max-w-7xl mx-auto">
+                  {children}
+                </div>
+              </main>
+
+              {/* Dedicated Mobile Navigation Dock (Visible on mobile/tablet only) */}
+              <MobileNav merchantName={merchantName} />
+
             </div>
-
-            {/* Right controls */}
-            <div className="flex items-center gap-1.5 sm:gap-3 flex-shrink-0">
-              {/* Mode toggle badge */}
-              <div className="scale-90 sm:scale-100">
-                <ModeBadge />
-              </div>
-
-              {/* Notification bell */}
-              <NotificationBell />
-
-              {/* Dark mode toggle */}
-              <ThemeToggle />
-
-              {/* Avatar */}
-              <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-brand to-blue-400 flex items-center justify-center text-white text-xs font-bold shadow-sm flex-shrink-0">
-                {merchantName.charAt(0).toUpperCase() || 'A'}
-              </div>
-            </div>
-          </header>
-
-          {/* Page content */}
-          <main className="flex-1 overflow-y-auto p-3.5 sm:p-6 md:p-8 dark:bg-slate-950 overscroll-contain">
-            <div className="max-w-[1200px] mx-auto">
-              {children}
-            </div>
-          </main>
-        </div>
-      </div>
-    </ToastProvider>
-    </ThemeProvider>
+          </div>
+        </ToastProvider>
+      </ThemeProvider>
     </ModeProvider>
   );
 }

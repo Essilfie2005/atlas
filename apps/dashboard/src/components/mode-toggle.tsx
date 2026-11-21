@@ -13,7 +13,6 @@ const ModeContext = createContext<ModeContextValue>({ mode: 'test', toggle: () =
 
 export function ModeProvider({ children }: { children: React.ReactNode }) {
   const [mode, setMode] = useState<Mode>('test');
-  const [confirmed, setConfirmed] = useState(false);
   const [showDialog, setShowDialog] = useState(false);
 
   useEffect(() => {
@@ -23,7 +22,7 @@ export function ModeProvider({ children }: { children: React.ReactNode }) {
 
   const toggle = () => {
     if (mode === 'test') {
-      setShowDialog(true); // ask before going live
+      setShowDialog(true);
     } else {
       setMode('test');
       localStorage.setItem('atlas_mode', 'test');
@@ -42,34 +41,32 @@ export function ModeProvider({ children }: { children: React.ReactNode }) {
 
       {/* Go-live confirmation dialog */}
       {showDialog && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[9999] p-4">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8">
-            <div className="w-14 h-14 rounded-2xl bg-red-50 flex items-center justify-center mx-auto mb-5">
-              <svg className="w-7 h-7 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+        <div className="fixed inset-0 bg-zinc-950/60 backdrop-blur-sm flex items-end sm:items-center justify-center z-[9999] p-0 sm:p-4">
+          <div className="bg-white dark:bg-zinc-900 rounded-t-3xl sm:rounded-2xl shadow-2xl w-full max-w-md p-6 sm:p-7 border sm:border border-zinc-200 dark:border-zinc-800 animate-in slide-in-from-bottom sm:zoom-in-95 duration-150">
+            <div className="w-12 h-12 rounded-2xl bg-amber-50 dark:bg-amber-950/50 flex items-center justify-center mx-auto mb-4 border border-amber-200 dark:border-amber-800">
+              <svg className="w-6 h-6 text-amber-600 dark:text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v4m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
               </svg>
             </div>
-            <h2 className="text-xl font-black text-slate-900 text-center mb-2">Switch to Live Mode?</h2>
-            <p className="text-slate-500 text-sm text-center leading-relaxed mb-6">
-              You are about to leave Test Mode. In Live Mode,{' '}
-              <strong className="text-slate-800">real money will be processed</strong> and live API keys will be used.
-              Make sure your integration is fully tested before proceeding.
+            <h2 className="text-lg font-bold text-zinc-900 dark:text-white text-center mb-1.5">Switch to Live Mode?</h2>
+            <p className="text-zinc-500 dark:text-zinc-400 text-xs text-center leading-relaxed mb-5">
+              In Live Mode, <strong className="text-zinc-800 dark:text-zinc-200">real funds are moved</strong> across MTN, Telecel, and bank clearing rails. Verify your live credentials before processing real customer charges.
             </p>
-            <div className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 mb-6 text-xs text-amber-800 leading-relaxed">
-              ⚠️ Live mode uses your <strong>sk_live_...</strong> keys. Test transactions and test data will not be visible.
+            <div className="bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 rounded-xl px-3.5 py-2.5 mb-5 text-[11px] text-amber-800 dark:text-amber-300 leading-relaxed">
+              ⚠️ Live mode calls use your <strong>sk_live_...</strong> API keys. Test data will be isolated from your live ledger.
             </div>
-            <div className="flex gap-3">
+            <div className="flex gap-2.5">
               <button
                 onClick={() => setShowDialog(false)}
-                className="flex-1 py-3 border border-slate-200 text-slate-600 font-semibold rounded-xl hover:bg-slate-50 transition-colors text-sm"
+                className="flex-1 py-2.5 border border-zinc-200 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 font-semibold rounded-xl hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors text-xs"
               >
-                Stay in Test Mode
+                Stay in Testnet
               </button>
               <button
                 onClick={confirmGoLive}
-                className="flex-1 py-3 bg-red-500 hover:bg-red-600 text-white font-semibold rounded-xl transition-colors text-sm"
+                className="flex-1 py-2.5 bg-brand hover:bg-brand-dark text-white font-semibold rounded-xl transition-colors text-xs shadow-sm"
               >
-                Yes, Go Live
+                Activate Live
               </button>
             </div>
           </div>
@@ -84,20 +81,20 @@ export function useMode() {
 }
 
 export function ModeBadge() {
-  const { mode, toggle, isLive } = useMode();
+  const { toggle, isLive } = useMode();
   return (
     <button
       onClick={toggle}
-      className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold border transition-colors cursor-pointer select-none ${
+      className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold border transition-all cursor-pointer select-none active:scale-95 ${
         isLive
-          ? 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100'
-          : 'bg-amber-50 text-amber-700 border-amber-200 hover:bg-amber-100'
+          ? 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:border-emerald-800 hover:bg-emerald-100'
+          : 'bg-amber-50 text-amber-800 border-amber-200 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-800 hover:bg-amber-100'
       }`}
       title={isLive ? 'Click to switch to Test Mode' : 'Click to switch to Live Mode'}
     >
       <span className={`w-1.5 h-1.5 rounded-full ${isLive ? 'bg-emerald-500' : 'bg-amber-500 animate-pulse'}`} />
-      {isLive ? 'Live Mode' : 'Test Mode'}
-      <svg className="w-3 h-3 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+      <span>{isLive ? 'Live' : 'Testnet'}</span>
+      <svg className="w-2.5 h-2.5 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
         <path strokeLinecap="round" strokeLinejoin="round" d="M8 9l4-4 4 4m0 6l-4 4-4-4" />
       </svg>
     </button>

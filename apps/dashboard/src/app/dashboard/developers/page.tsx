@@ -4,7 +4,8 @@ import { useState, useEffect } from 'react';
 import { apiFetch } from '@/lib/api-client';
 import {
   Key, Webhook, BookOpen, Copy, Check, Code,
-  ExternalLink, Play, Shield, Terminal, Globe, Smartphone
+  ExternalLink, Play, Shield, Terminal, Globe, Smartphone,
+  CheckCircle2, Sparkles
 } from 'lucide-react';
 import Script from 'next/script';
 
@@ -13,7 +14,6 @@ export default function DevelopersPage() {
   const [apiKeys, setApiKeys] = useState<any[]>([]);
   const [loadingKeys, setLoadingKeys] = useState(true);
   const [selectedLang, setSelectedLang] = useState<'html' | 'nodejs' | 'python' | 'curl'>('html');
-
   const [copiedKey, setCopiedKey] = useState<string | null>(null);
 
   useEffect(() => {
@@ -102,21 +102,20 @@ async function createPaymentIntent() {
   const response = await axios.post(
     'https://atlas-vrv3.onrender.com/v1/payment-intents',
     {
-      amount: 2500, // 25.00 in minor currency units (pesewas/kobo)
+      amount: 2500, // Amount in minor units (2500 = GHS 25.00)
       currency: 'GHS',
       customerEmail: 'customer@example.com',
-      description: 'Order #1092',
-      metadata: { orderId: '1092' }
+      description: 'Order #1042',
     },
     {
       headers: {
-        Authorization: 'Bearer ${secretKey}', // Your ATLAS Secret Key
-        'Content-Type': 'application/json'
-      }
+        Authorization: 'Bearer ${secretKey}',
+        'Content-Type': 'application/json',
+      },
     }
   );
 
-  console.log('Created Intent:', response.data);
+  console.log('Payment Intent Created:', response.data);
   return response.data;
 }
 
@@ -133,7 +132,7 @@ headers = {
 }
 
 payload = {
-    "amount": 2500,  # Minor units
+    "amount": 2500,  # Minor units (2500 = GHS 25.00)
     "currency": "GHS",
     "customerEmail": "customer@example.com",
     "description": "Subscription Renewal"
@@ -155,32 +154,34 @@ curl -X POST https://atlas-vrv3.onrender.com/v1/payment-intents \\
   };
 
   return (
-    <div className="space-y-4 sm:space-y-6 max-w-6xl mx-auto">
+    <div className="space-y-5 max-w-6xl mx-auto">
       {/* Load atlas.js for live testing */}
       <Script src="/atlas.js" strategy="lazyOnload" />
 
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Developer Center</h1>
-          <p className="text-sm text-slate-500 mt-1">
-            Integrate Pan-African payment rails into your websites, mobile apps, and backend services.
+          <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-zinc-900 dark:text-white">
+            Developer Hub & SDKs
+          </h2>
+          <p className="text-xs sm:text-sm text-zinc-500 dark:text-zinc-400 mt-0.5">
+            Integrate Pan-African payment rails into your web apps, mobile apps, and backend services.
           </p>
         </div>
-        <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+        <div className="flex flex-wrap items-center gap-2">
           <a
             href="https://atlas-vrv3.onrender.com/docs"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl border border-slate-200 bg-white text-xs font-semibold text-slate-700 hover:bg-slate-50 transition shadow-sm"
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 text-xs font-semibold text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800/80 transition shadow-subtle active:scale-95"
           >
             <BookOpen className="w-3.5 h-3.5" />
-            <span>Interactive API Swagger</span>
-            <ExternalLink className="w-3 h-3 text-slate-400" />
+            <span>Interactive OpenAPI Docs</span>
+            <ExternalLink className="w-3 h-3 text-zinc-400" />
           </a>
           <button
             onClick={runDemoCheckout}
-            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold shadow-sm shadow-blue-500/20 transition"
+            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-brand hover:bg-brand-dark text-white text-xs font-semibold shadow-sm transition active:scale-95"
           >
             <Play className="w-3.5 h-3.5 fill-current" />
             <span>Test Checkout Modal</span>
@@ -189,99 +190,75 @@ curl -X POST https://atlas-vrv3.onrender.com/v1/payment-intents \\
       </div>
 
       {/* Navigation Tabs */}
-      <div className="flex gap-1 sm:gap-2 border-b border-slate-200 overflow-x-auto no-scrollbar whitespace-nowrap -mx-1 px-1 sm:mx-0 sm:px-0">
-        <button
-          onClick={() => setActiveTab('quickstart')}
-          className={`flex items-center gap-2 py-3 px-4 border-b-2 font-medium text-sm transition-all ${
-            activeTab === 'quickstart'
-              ? 'border-blue-600 text-blue-600 font-semibold'
-              : 'border-transparent text-slate-500 hover:text-slate-800'
-          }`}
-        >
-          <Code className="w-4 h-4" />
-          Quickstart & SDKs
-        </button>
-
-        <button
-          onClick={() => setActiveTab('keys')}
-          className={`flex items-center gap-2 py-3 px-4 border-b-2 font-medium text-sm transition-all ${
-            activeTab === 'keys'
-              ? 'border-blue-600 text-blue-600 font-semibold'
-              : 'border-transparent text-slate-500 hover:text-slate-800'
-          }`}
-        >
-          <Key className="w-4 h-4" />
-          API Key Pairs
-        </button>
-
-        <button
-          onClick={() => setActiveTab('webhooks')}
-          className={`flex items-center gap-2 py-3 px-4 border-b-2 font-medium text-sm transition-all ${
-            activeTab === 'webhooks'
-              ? 'border-blue-600 text-blue-600 font-semibold'
-              : 'border-transparent text-slate-500 hover:text-slate-800'
-          }`}
-        >
-          <Webhook className="w-4 h-4" />
-          Webhooks
-        </button>
-
-        <button
-          onClick={() => setActiveTab('endpoints')}
-          className={`flex items-center gap-2 py-3 px-4 border-b-2 font-medium text-sm transition-all ${
-            activeTab === 'endpoints'
-              ? 'border-blue-600 text-blue-600 font-semibold'
-              : 'border-transparent text-slate-500 hover:text-slate-800'
-          }`}
-        >
-          <Terminal className="w-4 h-4" />
-          Core Endpoints
-        </button>
+      <div className="flex gap-1 border-b border-zinc-200 dark:border-zinc-800 overflow-x-auto no-scrollbar whitespace-nowrap">
+        {[
+          { id: 'quickstart', label: 'Quickstart & SDKs', icon: Code },
+          { id: 'keys', label: 'API Key Pairs', icon: Key },
+          { id: 'webhooks', label: 'Webhooks', icon: Webhook },
+          { id: 'endpoints', label: 'Core Endpoints', icon: Terminal },
+        ].map(tab => {
+          const Icon = tab.icon;
+          const isActive = activeTab === tab.id;
+          return (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id as any)}
+              className={`flex items-center gap-2 py-2.5 px-3.5 border-b-2 font-medium text-xs sm:text-sm transition-all whitespace-nowrap ${
+                isActive
+                  ? 'border-brand text-brand dark:text-blue-400 font-semibold'
+                  : 'border-transparent text-zinc-500 hover:text-zinc-800 dark:text-zinc-400 dark:hover:text-zinc-200'
+              }`}
+            >
+              <Icon className="w-4 h-4" />
+              <span>{tab.label}</span>
+            </button>
+          );
+        })}
       </div>
 
       {/* Tab 1: Quickstart & SDKs */}
       {activeTab === 'quickstart' && (
-        <div className="space-y-6">
+        <div className="space-y-5">
           {/* Hero Banner */}
-          <div className="bg-gradient-to-r from-slate-900 to-indigo-950 rounded-2xl p-4 sm:p-6 text-white shadow-xl relative overflow-hidden">
+          <div className="bg-zinc-950 text-white rounded-2xl p-5 sm:p-6 border border-zinc-800 shadow-card relative overflow-hidden">
             <div className="relative z-10 max-w-2xl">
-              <span className="px-2.5 py-1 rounded-full bg-blue-500/20 text-blue-300 text-[11px] font-bold uppercase tracking-wider border border-blue-400/30">
-                Client SDK v1.0 Released
+              <span className="px-2.5 py-0.5 rounded-full bg-blue-500/20 text-blue-300 text-[10px] font-mono font-semibold uppercase tracking-wider border border-blue-400/30">
+                Client SDK v1.1 Active
               </span>
-              <h2 className="text-xl font-bold mt-2">Embed Checkout with atlas.js</h2>
-              <p className="text-sm text-slate-300 mt-1 leading-relaxed">
+              <h3 className="text-lg sm:text-xl font-bold mt-2">Embed Checkout with atlas.js</h3>
+              <p className="text-xs sm:text-sm text-zinc-400 mt-1 leading-relaxed">
                 Add African Mobile Money (MTN, Telecel, AT) and Card payments directly to any website with a single script tag. Zero dependencies required.
               </p>
-              <div className="flex items-center gap-3 mt-4">
+              <div className="flex flex-wrap items-center gap-2.5 mt-4">
                 <button
                   onClick={runDemoCheckout}
-                  className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-semibold flex items-center gap-2 transition"
+                  className="px-3.5 py-2 bg-brand hover:bg-brand-dark text-white rounded-xl text-xs font-semibold flex items-center gap-2 transition active:scale-95"
                 >
                   <Play className="w-3.5 h-3.5 fill-current" />
-                  Try Live Checkout Demo
+                  <span>Try Live Checkout Demo</span>
                 </button>
                 <button
                   onClick={() => setActiveTab('keys')}
-                  className="px-4 py-2 bg-white/10 hover:bg-white/15 text-white rounded-xl text-xs font-semibold transition"
+                  className="px-3.5 py-2 bg-zinc-850 hover:bg-zinc-800 text-zinc-200 rounded-xl text-xs font-semibold transition border border-zinc-700"
                 >
-                  View Your Public Key
+                  <span>View Public Key</span>
                 </button>
               </div>
             </div>
           </div>
 
           {/* Code Viewer */}
-          <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
-            <div className="px-3.5 sm:px-6 py-3 border-b border-slate-100 flex flex-wrap items-center justify-between gap-2 bg-slate-50/70">
-              <div className="flex items-center gap-2">
+          <div className="bg-white dark:bg-zinc-900 rounded-2xl border border-zinc-200/80 dark:border-zinc-800/80 overflow-hidden shadow-card">
+            <div className="px-4 py-3 border-b border-zinc-100 dark:border-zinc-800/80 flex flex-wrap items-center justify-between gap-2 bg-zinc-50 dark:bg-zinc-850/60">
+              <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5">
                 {(['html', 'nodejs', 'python', 'curl'] as const).map((lang) => (
                   <button
                     key={lang}
                     onClick={() => setSelectedLang(lang)}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-semibold uppercase tracking-wider transition ${
+                    className={`px-3 py-1.5 rounded-lg text-xs font-medium uppercase tracking-wider transition ${
                       selectedLang === lang
-                        ? 'bg-slate-900 text-white shadow-sm'
-                        : 'text-slate-600 hover:bg-slate-200/60'
+                        ? 'bg-zinc-900 text-white dark:bg-zinc-100 dark:text-zinc-900 shadow-sm'
+                        : 'text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200/60 dark:hover:bg-zinc-800'
                     }`}
                   >
                     {lang === 'html' ? 'atlas.js (HTML)' : lang}
@@ -291,24 +268,24 @@ curl -X POST https://atlas-vrv3.onrender.com/v1/payment-intents \\
 
               <button
                 onClick={() => copyToClipboard(codeSnippets[selectedLang], 'snippet')}
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-200 bg-white text-xs font-medium text-slate-700 hover:bg-slate-50 transition"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-xs font-medium text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-750 transition active:scale-95"
               >
                 {copiedKey === 'snippet' ? (
                   <>
-                    <Check className="w-3.5 h-3.5 text-emerald-600" />
-                    <span className="text-emerald-700">Copied!</span>
+                    <Check className="w-3.5 h-3.5 text-emerald-500" />
+                    <span className="text-emerald-600 dark:text-emerald-400">Copied!</span>
                   </>
                 ) : (
                   <>
-                    <Copy className="w-3.5 h-3.5 text-slate-400" />
+                    <Copy className="w-3.5 h-3.5 text-zinc-400" />
                     <span>Copy Code</span>
                   </>
                 )}
               </button>
             </div>
 
-            <div className="p-3 sm:p-4 bg-slate-950 text-slate-100 overflow-x-auto max-w-full">
-              <pre className="font-mono text-xs leading-relaxed">
+            <div className="p-4 bg-zinc-950 text-zinc-100 overflow-x-auto max-w-full font-mono text-xs leading-relaxed">
+              <pre className="no-scrollbar">
                 <code>{codeSnippets[selectedLang]}</code>
               </pre>
             </div>
@@ -318,57 +295,57 @@ curl -X POST https://atlas-vrv3.onrender.com/v1/payment-intents \\
 
       {/* Tab 2: API Key Pairs */}
       {activeTab === 'keys' && (
-        <div className="bg-white rounded-2xl border border-slate-200 p-4 sm:p-6 space-y-4 sm:space-y-6 shadow-sm">
+        <div className="bg-white dark:bg-zinc-900 rounded-2xl border border-zinc-200/80 dark:border-zinc-800/80 p-5 sm:p-6 space-y-5 shadow-card">
           <div>
-            <h2 className="text-lg font-bold text-slate-900">Your Active API Key Pair</h2>
-            <p className="text-xs text-slate-500 mt-0.5">
-              Use your Public Key on frontend websites and mobile apps. Keep your Secret Key confidential on your backend.
+            <h3 className="text-base sm:text-lg font-semibold text-zinc-900 dark:text-white">Active Scoped API Key Pairs</h3>
+            <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">
+              Use your Public Key on client websites. Keep your Secret Key securely on your backend server.
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Public Key Card */}
-            <div className="bg-slate-50 border border-slate-200/80 rounded-2xl p-5 flex flex-col justify-between gap-3">
+            <div className="bg-zinc-50 dark:bg-zinc-850/60 border border-zinc-200/80 dark:border-zinc-800 rounded-2xl p-5 flex flex-col justify-between gap-3">
               <div>
                 <div className="flex items-center justify-between">
-                  <span className="px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider bg-blue-100 text-blue-700">
-                    Public (Publishable) Key
+                  <span className="px-2 py-0.5 rounded-md text-[10px] font-mono font-bold uppercase tracking-wider bg-blue-100 text-blue-800 dark:bg-blue-950/60 dark:text-blue-300">
+                    Publishable Key (Client)
                   </span>
                   <button
                     onClick={() => copyToClipboard(publicKey, 'pub')}
-                    className="p-1.5 rounded-lg bg-white border border-slate-200 text-slate-600 hover:bg-slate-100 transition"
+                    className="p-1.5 rounded-lg bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition"
                   >
-                    {copiedKey === 'pub' ? <Check className="w-4 h-4 text-emerald-600" /> : <Copy className="w-4 h-4" />}
+                    {copiedKey === 'pub' ? <Check className="w-4 h-4 text-emerald-500" /> : <Copy className="w-4 h-4" />}
                   </button>
                 </div>
-                <p className="text-xs text-slate-500 mt-2">
-                  Used by <strong>atlas.js</strong> and client-side checkout forms. Safe to publish publicly.
+                <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-2">
+                  Used by <strong>atlas.js</strong> drop-in forms. Safe to publish in frontend code.
                 </p>
               </div>
-              <code className="bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs font-mono text-slate-800 break-all select-all font-medium">
+              <code className="bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl px-3 py-2 text-xs font-mono text-zinc-900 dark:text-zinc-100 break-all select-all font-medium">
                 {publicKey}
               </code>
             </div>
 
             {/* Secret Key Card */}
-            <div className="bg-slate-50 border border-slate-200/80 rounded-2xl p-5 flex flex-col justify-between gap-3">
+            <div className="bg-zinc-50 dark:bg-zinc-850/60 border border-zinc-200/80 dark:border-zinc-800 rounded-2xl p-5 flex flex-col justify-between gap-3">
               <div>
                 <div className="flex items-center justify-between">
-                  <span className="px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider bg-amber-100 text-amber-700">
-                    Secret Key
+                  <span className="px-2 py-0.5 rounded-md text-[10px] font-mono font-bold uppercase tracking-wider bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300">
+                    Secret Key (Server)
                   </span>
                   <button
                     onClick={() => copyToClipboard(activeTestKey?.keyPrefix || 'sk_test_...', 'sec')}
-                    className="p-1.5 rounded-lg bg-white border border-slate-200 text-slate-600 hover:bg-slate-100 transition"
+                    className="p-1.5 rounded-lg bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition"
                   >
-                    {copiedKey === 'sec' ? <Check className="w-4 h-4 text-emerald-600" /> : <Copy className="w-4 h-4" />}
+                    {copiedKey === 'sec' ? <Check className="w-4 h-4 text-emerald-500" /> : <Copy className="w-4 h-4" />}
                   </button>
                 </div>
-                <p className="text-xs text-slate-500 mt-2">
-                  Used exclusively for server-to-server calls to create charges, initiate payouts, and fetch data.
+                <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-2">
+                  Used exclusively for server-to-server calls to create charges and execute payouts.
                 </p>
               </div>
-              <code className="bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs font-mono text-slate-500 break-all select-all">
+              <code className="bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl px-3 py-2 text-xs font-mono text-zinc-400 break-all select-all">
                 {secretKey}
               </code>
             </div>
@@ -378,16 +355,16 @@ curl -X POST https://atlas-vrv3.onrender.com/v1/payment-intents \\
 
       {/* Tab 3: Webhooks */}
       {activeTab === 'webhooks' && (
-        <div className="bg-white rounded-2xl border border-slate-200 p-6 space-y-6 shadow-sm">
+        <div className="bg-white dark:bg-zinc-900 rounded-2xl border border-zinc-200/80 dark:border-zinc-800/80 p-5 sm:p-6 space-y-4 shadow-card">
           <div>
-            <h2 className="text-lg font-bold text-slate-900">Webhook Events & Verification</h2>
-            <p className="text-xs text-slate-500 mt-0.5">
-              ATLAS sends real-time HTTP POST notifications to your server whenever a transaction completes or changes state.
+            <h3 className="text-base sm:text-lg font-semibold text-zinc-900 dark:text-white">Webhook Signature Verification</h3>
+            <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-0.5">
+              ATLAS signs all event payloads with HMAC-SHA512. Verify each request before fulfilling orders.
             </p>
           </div>
 
-          <div className="bg-slate-950 text-slate-100 rounded-2xl p-5 font-mono text-xs overflow-x-auto">
-            <p className="text-slate-400 mb-2">// Verifying webhook signatures in Node.js / Express:</p>
+          <div className="bg-zinc-950 text-zinc-100 rounded-2xl p-4 font-mono text-xs overflow-x-auto leading-relaxed border border-zinc-800">
+            <p className="text-zinc-400 mb-2">// Node.js / Express Webhook Handler:</p>
             <pre>
               {`const crypto = require('crypto');
 
@@ -418,7 +395,7 @@ app.post('/webhook', (req, res) => {
 
       {/* Tab 4: Core Endpoints */}
       {activeTab === 'endpoints' && (
-        <div className="space-y-4">
+        <div className="space-y-3">
           {[
             {
               method: 'POST',
@@ -446,21 +423,21 @@ app.post('/webhook', (req, res) => {
               desc: 'Generate a hosted, shareable payment link for products or services.',
             },
           ].map((ep, i) => (
-            <div key={i} className="bg-white rounded-2xl border border-slate-200 p-5 flex items-center justify-between gap-4 shadow-sm">
+            <div key={i} className="bg-white dark:bg-zinc-900 rounded-2xl border border-zinc-200/80 dark:border-zinc-800/80 p-4 sm:p-5 flex items-center justify-between gap-4 shadow-card">
               <div className="space-y-1">
                 <div className="flex items-center gap-2">
-                  <span className="px-2.5 py-1 rounded-md text-[11px] font-bold font-mono bg-blue-100 text-blue-700">
+                  <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-blue-100 text-blue-800 dark:bg-blue-950/60 dark:text-blue-300">
                     {ep.method}
                   </span>
-                  <code className="text-sm font-bold text-slate-800 font-mono">{ep.path}</code>
+                  <code className="text-xs sm:text-sm font-semibold text-zinc-900 dark:text-zinc-100 font-mono">{ep.path}</code>
                 </div>
-                <p className="text-xs text-slate-500">{ep.desc}</p>
+                <p className="text-xs text-zinc-500 dark:text-zinc-400">{ep.desc}</p>
               </div>
               <a
                 href="https://atlas-vrv3.onrender.com/docs"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-xs font-semibold text-blue-600 hover:text-blue-700 flex items-center gap-1 shrink-0"
+                className="text-xs font-semibold text-brand dark:text-blue-400 hover:underline flex items-center gap-1 shrink-0"
               >
                 <span>Docs</span>
                 <ExternalLink className="w-3 h-3" />

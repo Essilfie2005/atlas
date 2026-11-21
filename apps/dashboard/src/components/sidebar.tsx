@@ -1,52 +1,70 @@
 'use client';
+
 import React from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { cn } from '@/lib/utils';
-import { Home, Activity, Users, RefreshCw, AlertCircle, Send, Layout, Repeat, Share2, Briefcase, FileText, Code, Settings, UserCheck, X, Zap } from 'lucide-react';
+import {
+  Home,
+  ArrowLeftRight,
+  Users,
+  RefreshCw,
+  AlertCircle,
+  Send,
+  Layout,
+  Repeat,
+  Share2,
+  Briefcase,
+  FileText,
+  Code2,
+  Settings,
+  UserCheck,
+  Zap,
+  LogOut,
+  ExternalLink,
+  ChevronRight,
+} from 'lucide-react';
 
 const navGroups = [
   {
-    label: '',
     items: [
-      { label: 'Home', href: '/dashboard', icon: <Home className="w-4 h-4" /> },
-    ]
+      { label: 'Overview', href: '/dashboard', icon: Home, exact: true },
+    ],
   },
   {
-    label: 'CORE',
+    label: 'TRANSACTIONS & FLOWS',
     items: [
-      { label: 'Transactions', href: '/dashboard/transactions', icon: <Activity className="w-4 h-4" /> },
-      { label: 'Customers',    href: '/dashboard/customers',    icon: <Users className="w-4 h-4" /> },
-      { label: 'Refunds',      href: '/dashboard/refunds',      icon: <RefreshCw className="w-4 h-4" /> },
-      { label: 'Disputes',     href: '/dashboard/disputes',     icon: <AlertCircle className="w-4 h-4" /> },
-    ]
+      { label: 'Transactions', href: '/dashboard/transactions', icon: ArrowLeftRight, exact: false },
+      { label: 'Customers', href: '/dashboard/customers', icon: Users, exact: false },
+      { label: 'Refunds', href: '/dashboard/refunds', icon: RefreshCw, exact: false },
+      { label: 'Disputes', href: '/dashboard/disputes', icon: AlertCircle, exact: false },
+    ],
   },
   {
-    label: 'PAYMENTS',
+    label: 'PAYMENTS & RAILS',
     items: [
-      { label: 'Payouts',        href: '/dashboard/payouts',        icon: <Send className="w-4 h-4" /> },
-      { label: 'Beneficiaries',  href: '/dashboard/beneficiaries',  icon: <UserCheck className="w-4 h-4" /> },
-      { label: 'Payment Pages',  href: '/dashboard/payment-pages',  icon: <Layout className="w-4 h-4" /> },
-      { label: 'Recurring',      href: '/dashboard/recurring',      icon: <Repeat className="w-4 h-4" /> },
-      { label: 'Split Payments', href: '/dashboard/split-payments', icon: <Share2 className="w-4 h-4" /> },
-    ]
+      { label: 'Payouts', href: '/dashboard/payouts', icon: Send, exact: false },
+      { label: 'Beneficiaries', href: '/dashboard/beneficiaries', icon: UserCheck, exact: false },
+      { label: 'Payment Pages', href: '/dashboard/payment-pages', icon: Layout, exact: false },
+      { label: 'Recurring Plans', href: '/dashboard/recurring', icon: Repeat, exact: false },
+      { label: 'Split Payments', href: '/dashboard/split-payments', icon: Share2, exact: false },
+    ],
   },
   {
-    label: 'REPORTS',
+    label: 'FINANCIAL INTELLIGENCE',
     items: [
-      { label: 'Settlements', href: '/dashboard/settlements', icon: <Briefcase className="w-4 h-4" /> },
-      { label: 'Audit Logs',  href: '/dashboard/audit-logs',  icon: <FileText className="w-4 h-4" /> },
-    ]
+      { label: 'Settlements', href: '/dashboard/settlements', icon: Briefcase, exact: false },
+      { label: 'Audit Logs', href: '/dashboard/audit-logs', icon: FileText, exact: false },
+    ],
   },
   {
-    label: 'CONFIGURE',
+    label: 'DEVELOPER & SETTINGS',
     items: [
-      { label: 'Team',       href: '/dashboard/team',       icon: <Users className="w-4 h-4" /> },
-      { label: 'Go Live',    href: '/dashboard/go-live',    icon: <Zap className="w-4 h-4" /> },
-      { label: 'Developers', href: '/dashboard/developers', icon: <Code className="w-4 h-4" /> },
-      { label: 'Settings',   href: '/dashboard/settings',   icon: <Settings className="w-4 h-4" /> },
-    ]
-  }
+      { label: 'Developers', href: '/dashboard/developers', icon: Code2, exact: false },
+      { label: 'Go Live', href: '/dashboard/go-live', icon: Zap, exact: false },
+      { label: 'Team', href: '/dashboard/team', icon: Users, exact: false },
+      { label: 'Settings', href: '/dashboard/settings', icon: Settings, exact: false },
+    ],
+  },
 ];
 
 export function Sidebar({ onClose }: { onClose?: () => void }) {
@@ -63,54 +81,55 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
   };
 
   return (
-    <div className="w-[240px] bg-sidebar text-sidebar-muted flex flex-col h-screen overflow-y-auto">
-
-      {/* Logo + mobile close */}
-      <div className="px-5 py-5 border-b border-white/5 flex items-center justify-between">
+    <aside className="w-[240px] bg-zinc-950 text-zinc-400 flex flex-col h-full border-r border-zinc-800/80 select-none">
+      
+      {/* Brand Header */}
+      <div className="h-16 px-5 border-b border-zinc-800/80 flex items-center justify-between">
         <Link href="/dashboard" className="flex items-center gap-2.5" onClick={onClose}>
-          <div className="w-8 h-8 bg-brand rounded-lg flex items-center justify-center shadow-md flex-shrink-0">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <div className="w-8 h-8 bg-brand rounded-lg flex items-center justify-center text-white shadow-sm flex-shrink-0">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
               <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
             </svg>
           </div>
-          <div>
-            <span className="font-bold text-base text-white tracking-tight leading-none">ATLAS</span>
-            <p className="text-[10px] text-white/40 leading-none mt-0.5 truncate max-w-[130px]">{merchantName}</p>
+          <div className="min-w-0">
+            <div className="flex items-center gap-1.5">
+              <span className="font-semibold text-white tracking-tight text-sm">ATLAS</span>
+              <span className="text-[10px] font-mono uppercase bg-zinc-800 text-zinc-300 px-1 py-0.2 rounded font-medium">v1.1</span>
+            </div>
+            <p className="text-[11px] text-zinc-500 truncate max-w-[130px] leading-tight mt-0.5">{merchantName}</p>
           </div>
         </Link>
-        {onClose && (
-          <button onClick={onClose} className="lg:hidden w-7 h-7 flex items-center justify-center rounded-lg text-white/40 hover:text-white hover:bg-white/10 transition-colors">
-            <X className="w-4 h-4" />
-          </button>
-        )}
       </div>
 
-      {/* Navigation */}
-      <nav className="flex-1 px-3 py-4 space-y-4 overflow-y-auto">
-        {navGroups.map((group, i) => (
-          <div key={i}>
+      {/* Navigation Group Items */}
+      <nav className="flex-1 px-3 py-4 space-y-5 overflow-y-auto no-scrollbar">
+        {navGroups.map((group, groupIdx) => (
+          <div key={groupIdx}>
             {group.label && (
-              <p className="px-3 mb-1.5 text-[10px] font-semibold uppercase tracking-widest text-white/20">
+              <p className="px-3 mb-1.5 text-[10px] font-semibold tracking-wider uppercase text-zinc-500">
                 {group.label}
               </p>
             )}
             <ul className="space-y-0.5">
-              {group.items.map((item, j) => {
-                const isActive = pathname === item.href || (item.href !== '/dashboard' && pathname.startsWith(item.href));
+              {group.items.map((item) => {
+                const Icon = item.icon;
+                const isActive = item.exact
+                  ? pathname === item.href
+                  : pathname === item.href || (item.href !== '/dashboard' && pathname.startsWith(item.href));
+
                 return (
-                  <li key={j}>
+                  <li key={item.href}>
                     <Link
                       href={item.href}
                       onClick={onClose}
-                      className={cn(
-                        'flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-all duration-150',
+                      className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs transition-colors ${
                         isActive
-                          ? 'bg-brand/20 text-white border border-brand/30'
-                          : 'text-white/50 hover:bg-white/5 hover:text-white'
-                      )}
+                          ? 'bg-zinc-800/90 text-white font-medium shadow-sm'
+                          : 'text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900/60 font-normal'
+                      }`}
                     >
-                      <span className={cn('shrink-0', isActive ? 'text-blue-400' : 'text-white/40')}>{item.icon}</span>
-                      {item.label}
+                      <Icon className={`w-4 h-4 flex-shrink-0 ${isActive ? 'text-brand-light' : 'text-zinc-400'}`} />
+                      <span className="truncate">{item.label}</span>
                     </Link>
                   </li>
                 );
@@ -120,24 +139,25 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
         ))}
       </nav>
 
-      {/* Footer */}
-      <div className="px-3 py-4 border-t border-white/5 space-y-0.5">
-        <Link
-          href="/dashboard/settings"
-          onClick={onClose}
-          className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-white/50 hover:bg-white/5 hover:text-white transition-all"
-        >
-          <svg className="w-4 h-4 text-white/40" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4" strokeWidth={1.75} /><path strokeLinecap="round" strokeWidth={1.75} d="M4 20c0-4 3.582-7 8-7s8 3 8 7" /></svg>
-          Account
-        </Link>
+      {/* Footer System Status & Logout */}
+      <div className="p-3 border-t border-zinc-800/80 space-y-2">
+        <div className="flex items-center justify-between px-3 py-1.5 text-[11px] text-zinc-400 bg-zinc-900/50 rounded-lg">
+          <span className="flex items-center gap-1.5">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+            <span className="font-medium text-zinc-300">Operational</span>
+          </span>
+          <span className="font-mono text-[10px] text-zinc-500">99.99%</span>
+        </div>
+
         <button
           onClick={handleSignOut}
-          className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-white/50 hover:bg-red-500/10 hover:text-red-400 transition-all"
+          className="w-full flex items-center gap-2 px-3 py-2 text-xs font-medium text-zinc-400 hover:text-rose-400 hover:bg-zinc-900/60 rounded-lg transition-colors"
         >
-          <svg className="w-4 h-4 text-white/40" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.75} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
-          Sign Out
+          <LogOut className="w-3.5 h-3.5" />
+          <span>Sign Out</span>
         </button>
       </div>
-    </div>
+
+    </aside>
   );
 }

@@ -1,54 +1,72 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,300;0,14..32,400;0,14..32,500;0,14..32,600;0,14..32,700;1,14..32,400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,300..700;1,14..32,400..600&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
+  :root {
+    --font-fallback: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+    -webkit-tap-highlight-color: transparent;
+  }
+
   body {
-    @apply bg-page-bg text-[#0B1F3A] antialiased;
-    font-family: 'Inter', system-ui, sans-serif;
+    @apply bg-slate-50 text-zinc-900 antialiased selection:bg-blue-100 selection:text-blue-900 dark:bg-zinc-950 dark:text-zinc-100 dark:selection:bg-blue-900 dark:selection:text-blue-200;
+    font-family: 'Inter', var(--font-fallback);
+    font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11', 'tnum';
+    letter-spacing: -0.011em;
+  }
+
+  /* Accessible focus states */
+  :focus-visible {
+    outline: 2px solid #2563EB;
+    outline-offset: 2px;
   }
 }
 
-html {
-  scroll-behavior: smooth;
+/* Numerals in fintech MUST align vertically */
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum';
 }
 
-/* Blue-tinted custom scrollbar */
-::-webkit-scrollbar { width: 6px; height: 6px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: #B0D8FF; border-radius: 4px; }
-::-webkit-scrollbar-thumb:hover { background: #2D8EFF; }
-
-/* Smooth transitions for interactive elements */
-* { transition-property: color, background-color, border-color, box-shadow; transition-duration: 150ms; }
-
-/* Focus ring in brand blue */
-:focus-visible { outline: 2px solid #2D8EFF; outline-offset: 2px; }
-
-/* ── Dark mode overrides ────────────────────────────────── */
-.dark body {
-  @apply bg-slate-950 text-slate-100;
+/* Subdued modern scrollbar */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #CBD5E1;
+  border-radius: 9999px;
+}
+.dark ::-webkit-scrollbar-thumb {
+  background: #27272A;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94A3B8;
+}
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #3F3F46;
 }
 
-/* Cards */
-.dark .bg-white { background-color: #0F1629 !important; }
-.dark .border-slate-100 { border-color: #1e293b !important; }
-.dark .text-slate-900 { color: #f1f5f9 !important; }
-.dark .text-slate-700 { color: #cbd5e1 !important; }
-.dark .text-slate-600 { color: #94a3b8 !important; }
-.dark .text-slate-500 { color: #64748b !important; }
-.dark .text-slate-400 { color: #475569 !important; }
-.dark .bg-slate-50 { background-color: #0c1322 !important; }
-.dark .bg-slate-50\/50 { background-color: rgba(12,19,34,0.5) !important; }
-.dark .divide-slate-50 > * + * { border-color: #1e293b !important; }
-.dark .hover\:bg-slate-50:hover { background-color: #0c1322 !important; }
-.dark .border-slate-200 { border-color: #1e293b !important; }
+/* Safe area insets for mobile devices (iPhone home indicator) */
+.safe-bottom {
+  padding-bottom: max(1rem, env(safe-area-inset-bottom));
+}
 
-/* Inputs in dark */
-.dark input, .dark select, .dark textarea {
-  background-color: #0c1322 !important;
-  color: #e2e8f0 !important;
-  border-color: #1e293b !important;
+/* Hide scrollbar utility */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
